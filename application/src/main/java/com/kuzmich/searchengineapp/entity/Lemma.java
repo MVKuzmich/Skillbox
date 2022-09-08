@@ -5,7 +5,6 @@ import lombok.*;
 import javax.persistence.*;
 import javax.persistence.Index;
 import javax.validation.constraints.NotNull;
-import java.beans.ConstructorProperties;
 import java.util.ArrayList;
 import java.util.List;
 

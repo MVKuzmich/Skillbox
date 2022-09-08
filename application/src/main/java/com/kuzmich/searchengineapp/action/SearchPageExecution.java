@@ -4,15 +4,13 @@ import com.kuzmich.searchengineapp.dto.searchDto.SearchPageData;
 import com.kuzmich.searchengineapp.entity.Index;
 import com.kuzmich.searchengineapp.entity.Lemma;
 import com.kuzmich.searchengineapp.entity.Page;
-import com.kuzmich.searchengineapp.repository.IndexRepository;
 import com.kuzmich.searchengineapp.repository.LemmaRepository;
-import com.kuzmich.searchengineapp.repository.PageRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
-
 import lombok.extern.log4j.Log4j2;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -25,143 +23,145 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class SearchPageExecution {
-    private final LemmaRepository lemmaRepository;
-    private final IndexRepository indexRepository;
-    private final PageRepository pageRepository;
 
+    private final LemmaRepository lemmaRepository;
 
     public List<SearchPageData> getSearchResultListFromUserQuery(String userQuery) {
         try {
-            long startMethod = System.currentTimeMillis() / 1_000;
-            List<Lemma> lemmaListFromUserQuery = findLemmasByWordsFromUserQuery(userQuery);
-            List<SearchPageData> resultList = new ArrayList<>();
-            if (!lemmaListFromUserQuery.isEmpty()) {
-                List<Index> indexList = indexRepository.findAllByLemmaId(lemmaListFromUserQuery.get(0).getId());
-                for (int i = 1; i < lemmaListFromUserQuery.size(); i++) {
-                    int position = i;
-                    indexList.removeIf(index -> index.getLemma().getId() == lemmaListFromUserQuery.get(position).getId());
-                }
-                if (!indexList.isEmpty()) {
-                    for (Index index : indexList) {
-                        long startIndex = System.currentTimeMillis() / 1000;
-                        int pageId = index.getPage().getId();
-                        Page page = pageRepository.findById(pageId).orElseThrow(() -> new RuntimeException("Page not found"));
-                        String siteName = page.getSite().getName();
-                        String siteUrl = page.getSite().getUrl();
-                        String pageUri = page.getPath();
-                        String pageTitle = Jsoup.parse(page.getContent()).title();
-                        log.info(pageId + " - " + pageUri + " - " + pageTitle);
-                        String pageSnippetByUserQuery = createSnippetFromPage(lemmaListFromUserQuery, page.getContent());
-                        float sumRank = 0;
-
-                        for (Lemma lemma : lemmaListFromUserQuery) {
-                            Optional<Index> indexOptional = indexRepository.findLemmaRankFromIndex(pageId, lemma.getId());
-                            if (indexOptional.isPresent()) {
-                                sumRank += indexOptional.get().getRank();
-                            }
-                        }
-                        SearchPageData searchPageData = SearchPageData
-                                .builder()
-                                .site(siteUrl)
-                                .siteName(siteName)
-                                .uri(pageUri)
-                                .title(pageTitle)
-                                .snippet(pageSnippetByUserQuery)
-                                .relevance(sumRank)
-                                .build();
-                        log.info("сниппет: {}, релевантность: {}", pageSnippetByUserQuery, sumRank);
-                        resultList.add(searchPageData);
-                        long duration = System.currentTimeMillis() / 1000 - startIndex;
-                        log.info("search for: pageID {}, path {}; duration: {}", page.getId(), page.getPath(), duration);
-                    }
-                    resultList.sort(Comparator.comparing(SearchPageData::getRelevance).reversed());
-                    long duration = System.currentTimeMillis() / 1000 - startMethod;
-                    log.info("ДЛИТЕЛЬНОСТЬ поиска: {}", duration);
-                    return resultList;
-                }
+            List<Lemma> lemmaObjectListFromUserQuery = findLemmasByWordsFromUserQuery(userQuery);
+            List<String> lemmaWordsFromUserQuery = lemmaObjectListFromUserQuery.stream()
+                    .map(Lemma::getLemma)
+                    .distinct()
+                    .collect(Collectors.toList());
+            List<Index> totalIndexList = lemmaObjectListFromUserQuery.stream()
+                    .flatMap(lemma -> lemma.getIndexList().stream())
+                    .collect(Collectors.toList());
+            if (lemmaWordsFromUserQuery.size() != 1) {
+                Set<Integer> ids = new HashSet<>();
+                List<Integer> commonPageIds = totalIndexList.stream().map(Index::getPage).map(Page::getId).filter(id -> !ids.add(id)).collect(Collectors.toList());
+                totalIndexList.removeIf(index -> !commonPageIds.contains(index.getPage().getId()));
             }
+            return (!totalIndexList.isEmpty())
+                    ? getSearchPageDataFromIndexes(totalIndexList, lemmaWordsFromUserQuery) : new ArrayList<>();
+
         } catch (IOException ex) {
             ex.printStackTrace();
         }
         return new ArrayList<>();
     }
-
-    private String cleanUpHtml(String text) {
-        String regex = "(\"?[А-яЁё]+?(-[А-яЁё]+|[\"\\s+\\n+\\.,!\\?])?\\s?|\\n\\d+\\s?)+";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(text);
-        List<String> wordList = new ArrayList<>();
-        while (matcher.find()) {
-            wordList.add(matcher.group());
-        }
-        return String.join("...", wordList);
-    }
-
-    private String createSnippetFromPage(List<Lemma> lemmaListFromQuery, String text) throws IOException {
-        long startSnippet = System.currentTimeMillis() / 1000;
-        String parseText = Jsoup.parse(text).text();
-        String regexFirstLetter = lemmaListFromQuery.stream()
-                .map(Lemma::getLemma)
-                .map(w -> w.substring(0, 1))
-                .distinct()
-                .collect(Collectors.joining("|"));
-        String regex = "\\b".concat("(").concat(regexFirstLetter).concat(")").concat("[А-яЁё]+(-[А-яЁё]+)?");
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(parseText.toLowerCase(Locale.ROOT));
-        TreeMap<String, String> lemma2word = new TreeMap<>();
-        Set<Integer> wordIndexes = new TreeSet<>();
-        while (matcher.find()) {
-            String word = matcher.group();
-            String normalWordForm = new RussianLuceneMorphology().getNormalForms(word.toLowerCase(Locale.ROOT)).get(0);
-            Set<String> commonObjects = lemmaListFromQuery.stream()
-                    .map(Lemma::getLemma)
-                    .filter(w -> w.equals(normalWordForm))
-                    .collect(Collectors.toSet());
-            if (!commonObjects.isEmpty()) {
-                for (String lemmaWord : commonObjects) {
-                    log.info("лемма " + lemmaWord + " - " + "слово " + word.toUpperCase(Locale.ROOT));
-                    String result = lemma2word.putIfAbsent(lemmaWord, word);
-                    if (result == null) {
-                        wordIndexes.add(text.toLowerCase(Locale.ROOT).indexOf(word));
-                    }
-                }
-            }
-            if (wordIndexes.size() == lemmaListFromQuery.size()) {
-                break;
-            }
-        }
-
-        String partHtml = wordIndexes.stream().map(i -> text.substring(i - 100, i + 100)).collect(Collectors.joining(" "));
-        String cleanSnippet = cleanUpHtml(partHtml.toLowerCase(Locale.ROOT));
-        for (String value : lemma2word.values()) {
-            cleanSnippet = cleanSnippet.replaceAll("\\b".concat(value), "<b>".concat(value).concat("</b>"));
-        }
-
-        long duration = System.currentTimeMillis() / 1000 - startSnippet;
-        log.info("Длительность получения СНИППЕТА: {}", duration);
-        return cleanSnippet;
-    }
-
     public List<Lemma> findLemmasByWordsFromUserQuery(String userQuery) throws IOException {
         List<Lemma> lemmaList = new ArrayList<>();
         LuceneMorphology luceneMorph = new RussianLuceneMorphology();
-        String[] queryWords = userQuery.split(" ");
+        String[] queryWords = userQuery.toLowerCase().trim().split(" ");
 
         for (String word : queryWords) {
-            if (luceneMorph.getMorphInfo(word.toLowerCase(Locale.ROOT)).stream().anyMatch(i -> i.contains("ПРЕДЛ") || i.contains("СОЮЗ")
+            if (luceneMorph.getMorphInfo(word).stream().anyMatch(i -> i.contains("ПРЕДЛ") || i.contains("СОЮЗ")
                     || i.contains("ЧАСТ") || i.contains("МЕЖД"))) {
                 continue;
             }
             List<Lemma> formWords = luceneMorph.getNormalForms(word.toLowerCase(Locale.ROOT)).get(0).lines()
                     .map(lemmaRepository::findLemmaObjectByLemmaName)
                     .filter(Optional::isPresent)
-                    .map(Optional::get)
+                    .flatMap(lemmaListOpt -> lemmaListOpt.get().stream())
                     .collect(Collectors.toList());
             lemmaList.addAll(formWords);
         }
         lemmaList.sort(Comparator.comparing(Lemma::getFrequency).thenComparing(Lemma::getLemma));
         return lemmaList;
     }
+
+    private List<SearchPageData> getSearchPageDataFromIndexes(List<Index> indexList, List<String> lemmaWordsFromUserQuery) throws IOException {
+        long startMethod = System.currentTimeMillis() / 1_000;
+        List<SearchPageData> resultList = new ArrayList<>();
+        float maxRank = Float.MIN_VALUE;
+        List<Integer> pageIds = indexList.stream().map(Index::getPage).map(Page::getId).distinct().collect(Collectors.toList());
+        for (Integer id : pageIds) {
+            long startIndex = System.currentTimeMillis() / 1000;
+            Index indexForSearchPageData = indexList.stream().filter(index -> index.getPage().getId() == id).findFirst()
+                    .orElseThrow(() -> new RuntimeException("Something wrong"));
+            Element elementBody = Jsoup.parse(indexForSearchPageData.getPage().getContent()).body();
+            float sumRank = (float) indexList.stream().filter(ind -> ind.getPage().getId() == id)
+                    .mapToDouble(Index::getRank).sum();
+            if (sumRank > maxRank) {
+                maxRank = sumRank;
+            }
+            SearchPageData searchPageData = SearchPageData
+                    .builder()
+                    .site(indexForSearchPageData.getPage().getSite().getUrl())
+                    .siteName(indexForSearchPageData.getPage().getSite().getName())
+                    .uri(indexForSearchPageData.getPage().getPath())
+                    .title(Jsoup.parse(indexForSearchPageData.getPage().getContent()).title())
+                    .snippet(createSnippetFromPage(lemmaWordsFromUserQuery, elementBody))
+                    .relevance(sumRank)
+                    .build();
+            log.info("сниппет: {}, релевантность: {}", searchPageData.getSnippet(), searchPageData.getRelevance());
+            resultList.add(searchPageData);
+            long duration = System.currentTimeMillis() / 1000 - startIndex;
+            log.info("search for: pageID {}, path {}; SEARCH RESULT duration: {}", id, searchPageData.getUri(), duration);
+        }
+        long duration = System.currentTimeMillis() / 1000 - startMethod;
+        log.info("длительность ПОИСКА: {}", duration);
+        return updateSearchPageDataRelevance(maxRank, resultList).stream()
+                .sorted(Comparator.comparing(SearchPageData::getRelevance).reversed())
+                .collect(Collectors.toList());
+    }
+
+    private String createSnippetFromPage(List<String> lemmaWordsFromUserQuery, Element textElement) throws IOException {
+        Map<Integer, String> index2textWord = findWordsAndIndexesInTextByQueryLemmas(lemmaWordsFromUserQuery, textElement);
+        String partHtml = index2textWord.keySet().stream().map(wordIndex -> textElement.toString().substring(wordIndex - 100, wordIndex + 100)).collect(Collectors.joining(" "));
+        String cleanSnippet = cleanUpHtml(partHtml);
+        for (String word : index2textWord.values()) {
+            cleanSnippet = cleanSnippet.replaceAll("\\b".concat(word), "<b>".concat(word).concat("</b>"));
+        }
+        return cleanSnippet;
+    }
+
+    private List<SearchPageData> updateSearchPageDataRelevance(float maxRank, List<SearchPageData> resultList) {
+        return resultList.stream().peek(result -> result.setRelevance(result.getRelevance() / maxRank))
+                .collect(Collectors.toList());
+    }
+
+    private Map<Integer, String> findWordsAndIndexesInTextByQueryLemmas(List<String> lemmaWordsFromUserQuery, Element element) throws IOException {
+        List<String> lemmaWords = new ArrayList<>(lemmaWordsFromUserQuery);
+        String text = element.toString().toLowerCase();
+        String parseText = element.text().toLowerCase();
+        Pattern pattern = Pattern.compile(createRegex(lemmaWords));
+        Matcher matcher = pattern.matcher(parseText);
+        TreeMap<Integer, String> index2word = new TreeMap<>();
+        while (matcher.find()) {
+            String word = matcher.group();
+            String normalWordForm = new RussianLuceneMorphology().getNormalForms(word).get(0);
+            if (lemmaWords.contains(normalWordForm)) {
+                log.info("лемма: {}, слово: {}", normalWordForm, word.toUpperCase());
+                index2word.put(text.indexOf(word), word);
+                lemmaWords.remove(normalWordForm);
+            }
+            if (lemmaWords.isEmpty()) {
+                break;
+            }
+        }
+        return index2word;
+    }
+
+    private String createRegex(List<String> lemmaWords) {
+        String regexFirstLetter = lemmaWords.stream()
+                .filter(word -> word.length() > 1)
+                .map(word -> word.substring(0, 1))
+                .collect(Collectors.joining("|"));
+        return "\\b".concat("(").concat(regexFirstLetter).concat(")").concat("([А-яЁё]+)(-\1)?");
+    }
+
+    private String cleanUpHtml(String text) {
+        String regex = "(\"?(([А-яЁё\\d]+)(-\3|[\":;.,!?])?))\\s+?";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(text);
+        List<String> wordList = new ArrayList<>();
+        while (matcher.find()) {
+            wordList.add(matcher.group(1));
+        }
+        return String.join(" ", wordList);
+    }
+
 }
 
 

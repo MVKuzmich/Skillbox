@@ -7,6 +7,7 @@ import com.kuzmich.searchengineapp.exception.EmptySearchQueryException;
 import com.kuzmich.searchengineapp.exception.IndexExecutionException;
 import com.kuzmich.searchengineapp.service.SearchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +25,7 @@ public class SearchController {
 
     @GetMapping("/search")
     @ResponseBody
-    public SearchResult getSearchResult(@RequestParam("query") String query,
+    public ResponseEntity<SearchResult> getSearchResult(@RequestParam("query") String query,
                                         @RequestParam("offset") Integer offset,
                                         @RequestParam("limit") Integer limit) {
         if (query.isBlank()) {
@@ -35,7 +36,7 @@ public class SearchController {
         }
         else {
             SearchResult result = searchService.getSearchResult(query, offset, limit);
-            return result;
+            return ResponseEntity.ok(result);
         }
     }
 }

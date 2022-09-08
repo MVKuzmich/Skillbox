@@ -1,16 +1,12 @@
 package com.kuzmich.searchengineapp.controller;
 
 
-import com.kuzmich.searchengineapp.action.SearchPageExecution;
-import com.kuzmich.searchengineapp.action.SitesConcurrencyIndexingExecutor;
 import com.kuzmich.searchengineapp.dto.ResultDTO;
 import com.kuzmich.searchengineapp.dto.statistics.Result;
-import com.kuzmich.searchengineapp.exception.IndexExecutionException;
 import com.kuzmich.searchengineapp.service.IndexingService;
 import com.kuzmich.searchengineapp.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

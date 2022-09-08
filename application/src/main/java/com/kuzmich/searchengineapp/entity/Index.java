@@ -1,18 +1,13 @@
 package com.kuzmich.searchengineapp.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 @Table(name = "index_table", indexes = @javax.persistence.Index(columnList = "lemma_id"))
 public class Index extends BaseEntity {

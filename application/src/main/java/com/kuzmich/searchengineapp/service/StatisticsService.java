@@ -1,5 +1,6 @@
 package com.kuzmich.searchengineapp.service;
 
+import com.kuzmich.searchengineapp.action.SitesConcurrencyIndexingExecutor;
 import com.kuzmich.searchengineapp.dto.statistics.Detailed;
 import com.kuzmich.searchengineapp.dto.statistics.Result;
 import com.kuzmich.searchengineapp.dto.statistics.Statistics;
@@ -23,6 +24,7 @@ public class StatisticsService {
     private final PageRepository pageRepository;
     private final LemmaRepository lemmaRepository;
     private final SiteRepository siteRepository;
+    private final SitesConcurrencyIndexingExecutor indexingExecutor;
 
 
     public Result getStatisticInformation() {
@@ -54,9 +56,7 @@ public class StatisticsService {
                 .lemmas(detailedSiteStatisticsList.stream()
                         .mapToInt(Detailed::getLemmas)
                         .sum())
-                .isIndexing(detailedSiteStatisticsList.stream()
-                        .filter(detailed -> detailed.getStatus() != Status.INDEXING)
-                        .count() != detailedSiteStatisticsList.size())
+                .isIndexing(indexingExecutor.isExecuting())
                 .build();
     }
 

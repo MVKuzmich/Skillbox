@@ -22,5 +22,15 @@ public interface SiteRepository extends JpaRepository<Site, Integer> {
 
     @Modifying(flushAutomatically = true)
     @Query("update Site s set s.status = :status where s.id = :id")
-    void updateSiteStatusAfterIndexation(Status status, Integer id);
+    void updateSiteStatus(Status status, Integer id);
+
+    @Modifying(flushAutomatically = true)
+    @Query("update Site s set s.statusTime = :statusTime where s.id = :id")
+    void updateSiteStatusTime(long statusTime, Integer id);
+
+    @Modifying(flushAutomatically = true)
+    @Query("update Site s set s.status = :status, s.lastError = :error where s.id = :id")
+    void updateSiteStatusAndError(Status status, String error, Integer id);
+
+
 }

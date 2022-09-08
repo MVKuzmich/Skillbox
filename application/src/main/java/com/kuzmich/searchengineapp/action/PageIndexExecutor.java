@@ -4,16 +4,14 @@ import com.kuzmich.searchengineapp.entity.*;
 import com.kuzmich.searchengineapp.repository.FieldRepository;
 import com.kuzmich.searchengineapp.repository.IndexRepository;
 import com.kuzmich.searchengineapp.repository.LemmaRepository;
+import com.kuzmich.searchengineapp.repository.SiteRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.*;
-
 
 @Log4j2
 @Component
@@ -23,30 +21,28 @@ public class PageIndexExecutor {
     private final FieldRepository fieldRepository;
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
+    private final SiteRepository siteRepository;
 
-
-    public void executePageIndexing(Page page) {
-        try {
+    public void executePageIndexing(Page page, Document htmlDocument) throws IOException {
             if (!WebSiteAnalyzer.isIndexationStopped()) {
                 log.info("Индексируется {}", page.getPath());
                 long start = System.currentTimeMillis() / 1_000L;
                 List<Index> indexList = new ArrayList<>();
                 List<Field> fieldList = fieldRepository.findAll();
                 Site site = page.getSite();
-                Document document = Jsoup.parse(page.getContent());
                 for (Field field : fieldList) {
                     float tagWeight = field.getWeight();
-                    String wordsFromPageContentByTag = document.getElementsByTag(field.getSelector()).text();
-                    Map<String, Integer> mapLemmasByTag = new Lemmatizator().getLemmaList(wordsFromPageContentByTag.toLowerCase(Locale.ROOT));
+                    String wordsFromPageContentByTag = htmlDocument.getElementsByTag(field.getSelector()).text().toLowerCase();
+                    Map<String, Integer> mapLemmasByTag = new Lemmatizator().getLemmaList(wordsFromPageContentByTag);
                     Set<Map.Entry<String, Integer>> setLemmasByTag = mapLemmasByTag.entrySet();
                     float lemmaRankByTag;
                     for (Map.Entry<String, Integer> lemmaItem : setLemmasByTag) {
                         Lemma lemma;
                         synchronized (lemmaRepository) {
                             Optional<Lemma> lemmaOptional = lemmaRepository.findLemmaObjectByLemmaNameAndSiteId(lemmaItem.getKey(), site.getId());
-                            if (!lemmaOptional.isPresent()) {
+                            if (lemmaOptional.isEmpty()) {
                                 lemma = lemmaRepository.saveAndFlush(
-                                        new Lemma(lemmaItem.getKey(), lemmaItem.getValue(), site));
+                                        new Lemma(lemmaItem.getKey(), 1, site));
                             } else {
                                 lemma = lemmaOptional.get();
                                 lemma.setFrequency(lemma.getFrequency() + 1);
@@ -63,17 +59,13 @@ public class PageIndexExecutor {
                         }
                     }
                 }
-
                 indexRepository.saveAllAndFlush(indexList);
+                siteRepository.updateSiteStatusTime(System.currentTimeMillis(), site.getId());
 
                 long end = System.currentTimeMillis() / 1_000L;
                 long indexPageDuration = end - start;
                 log.info("ИНДЕКСАЦИЯ СТРАНИЦЫ: id - {}, path - {}, ДЛИТЕЛЬНОСТЬ: {}", page.getId(), page.getPath(), indexPageDuration);
-
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 }
 

@@ -24,22 +24,22 @@ public class SearchService {
     @Setter
     private String query;
 
+
     public SearchResult getSearchResult(String userQuery, Integer offset, Integer limit) {
+        if(query != null && !query.equals(userQuery)) {
+            resultList.clear();
+        }
         if(resultList.isEmpty()) {
             setQuery(userQuery);
-            resultList = searchPageExecution.getSearchResultListFromUserQuery(userQuery);
-        }
-        if(!query.equals(userQuery)) {
-            resultList.clear();
-            setQuery(userQuery);
-            resultList = searchPageExecution.getSearchResultListFromUserQuery(userQuery);
+            resultList = searchPageExecution.getSearchResultListFromUserQuery(query);
         }
         return SearchResult
                 .builder()
-                    .result(true)
-                    .count(resultList.size())
-                    .data(resultList.subList(offset, Math.min(resultList.size(), offset + limit)))
+                .result(true)
+                .count(resultList.size())
+                .data(resultList.subList(offset, Math.min(resultList.size(), offset + limit)))
                 .build();
 
     }
+
 }
