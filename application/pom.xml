@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.kuzmich</groupId>
-    <artifactId>SearchEngineApp</artifactId>
+    <artifactId>search-engine-app</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>application</name>
     <description>application</description>
