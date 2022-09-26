@@ -5,6 +5,7 @@ import com.kuzmich.searchengineapp.entity.Index;
 import com.kuzmich.searchengineapp.entity.Lemma;
 import com.kuzmich.searchengineapp.entity.Page;
 import com.kuzmich.searchengineapp.repository.LemmaRepository;
+import com.kuzmich.searchengineapp.repository.SiteRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
 import lombok.extern.log4j.Log4j2;
@@ -25,8 +26,9 @@ import java.util.stream.Collectors;
 public class SearchPageExecution {
 
     private final LemmaRepository lemmaRepository;
+    private final SiteRepository siteRepository;
 
-    public List<SearchPageData> getSearchResultListFromUserQuery(String userQuery) {
+    public List<SearchPageData> getSearchResultListFromUserQuery(String userQuery, String site) {
         try {
             List<Lemma> lemmaObjectListFromUserQuery = findLemmasByWordsFromUserQuery(userQuery);
             List<String> lemmaWordsFromUserQuery = lemmaObjectListFromUserQuery.stream()
@@ -41,6 +43,9 @@ public class SearchPageExecution {
                 List<Integer> commonPageIds = totalIndexList.stream().map(Index::getPage).map(Page::getId).filter(id -> !ids.add(id)).collect(Collectors.toList());
                 totalIndexList.removeIf(index -> !commonPageIds.contains(index.getPage().getId()));
             }
+            if (site != null) {
+                totalIndexList.removeIf(index -> index.getPage().getSite().getId() != siteRepository.getSiteByUrl(site).get().getId());
+            }
             return (!totalIndexList.isEmpty())
                     ? getSearchPageDataFromIndexes(totalIndexList, lemmaWordsFromUserQuery) : new ArrayList<>();
 
@@ -49,6 +54,7 @@ public class SearchPageExecution {
         }
         return new ArrayList<>();
     }
+
     public List<Lemma> findLemmasByWordsFromUserQuery(String userQuery) throws IOException {
         List<Lemma> lemmaList = new ArrayList<>();
         LuceneMorphology luceneMorph = new RussianLuceneMorphology();

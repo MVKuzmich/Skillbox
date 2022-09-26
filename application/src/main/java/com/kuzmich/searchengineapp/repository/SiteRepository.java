@@ -32,5 +32,6 @@ public interface SiteRepository extends JpaRepository<Site, Integer> {
     @Query("update Site s set s.status = :status, s.lastError = :error where s.id = :id")
     void updateSiteStatusAndError(Status status, String error, Integer id);
 
-
+    @Query("select s from Site s where s.url = :site")
+    Optional<Site> getSiteByUrl(String site);
 }
