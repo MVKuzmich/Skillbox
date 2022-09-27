@@ -44,7 +44,7 @@ public class SearchPageExecution {
                 totalIndexList.removeIf(index -> !commonPageIds.contains(index.getPage().getId()));
             }
             if (site != null) {
-                totalIndexList.removeIf(index -> index.getPage().getSite().getId() != siteRepository.getSiteByUrl(site).get().getId());
+                totalIndexList.removeIf(index -> index.getPage().getSite().getId() != siteRepository.findSiteByUrl(site).get().getId());
             }
             return (!totalIndexList.isEmpty())
                     ? getSearchPageDataFromIndexes(totalIndexList, lemmaWordsFromUserQuery) : new ArrayList<>();

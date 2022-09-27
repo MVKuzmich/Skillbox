@@ -41,7 +41,7 @@ public class SitesConcurrencyIndexingExecutor {
             long start = System.currentTimeMillis() / 1000;
             List<CompletableFuture<Integer>> futureList = new ArrayList<>();
             siteObjects.stream().map(siteObject -> {
-                        Optional<Site> foundSite = siteRepository.findByNameAndUrl(siteObject.getName(), siteObject.getUrl());
+                        Optional<Site> foundSite = siteRepository.findSiteByUrl(siteObject.getUrl());
                         foundSite.ifPresent(site -> siteRepository.removeSiteById(site.getId()));
                         WebSiteAnalyzer siteAnalyzer = new WebSiteAnalyzer(pageRepository, lemmaRepository, indexRepository, fieldRepository, siteRepository, siteConfig);
                         Site site = getSite(siteObject);

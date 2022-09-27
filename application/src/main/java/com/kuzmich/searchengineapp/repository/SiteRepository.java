@@ -14,8 +14,8 @@ import java.util.Optional;
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 public interface SiteRepository extends JpaRepository<Site, Integer> {
 
-    @Query("select s from Site s where s.name = :name and s.url = :url")
-    Optional<Site> findByNameAndUrl(String name, String url);
+    @Query("select s from Site s where s.url = :url")
+    Optional<Site> findSiteByUrl(String url);
 
     @Modifying(flushAutomatically = true)
     void removeSiteById(Integer id);
@@ -32,6 +32,4 @@ public interface SiteRepository extends JpaRepository<Site, Integer> {
     @Query("update Site s set s.status = :status, s.lastError = :error where s.id = :id")
     void updateSiteStatusAndError(Status status, String error, Integer id);
 
-    @Query("select s from Site s where s.url = :site")
-    Optional<Site> getSiteByUrl(String site);
 }

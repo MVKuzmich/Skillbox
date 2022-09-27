@@ -33,9 +33,10 @@ public class IndexingService {
     private final FieldRepository fieldRepository;
     private final IndexRepository indexRepository;
 
-
     public ResultDTO executeIndexation() throws IndexExecutionException, IndexInterruptedException {
-        if (!indexingExecutor.isExecuting()) {
+        if (indexingExecutor.isExecuting()) {
+            throw new IndexExecutionException(new ResultDTO(false, "Индексация уже запущена").getError());
+        } else {
             String exceptionMessage = "";
             try {
                 indexingExecutor.setExecuting(true);
@@ -47,25 +48,23 @@ public class IndexingService {
                 exceptionMessage = ex.getMessage();
                 throw ex;
             } finally {
-                if(!exceptionMessage.isBlank()) {
+                if (!exceptionMessage.isBlank()) {
                     updateSiteStatus(exceptionMessage);
                 }
                 WebSiteAnalyzer.getServiceSet().clear();
                 indexingExecutor.setExecuting(false);
             }
-        } else {
-            throw new IndexExecutionException(new ResultDTO(false, "Индексация уже запущена").getError());
         }
     }
 
     public ResultDTO stopIndexation() throws IndexExecutionException {
-        if (indexingExecutor.isExecuting()) {
+        if (!indexingExecutor.isExecuting()) {
+            throw new IndexExecutionException(new ResultDTO(false, "Индексация не запущена").getError());
+        } else {
             indexingExecutor.setExecuting(false);
             WebSiteAnalyzer.setIndexationStopped(true);
             updateSiteStatus("Индексация остановлена пользователем!");
             return new ResultDTO(true);
-        } else {
-            throw new IndexExecutionException(new ResultDTO(false, "Индексация не запущена").getError());
         }
     }
 
@@ -74,10 +73,12 @@ public class IndexingService {
         Optional<SiteConfig.SiteObject> siteObjectOptional = siteObjects.stream()
                 .filter(siteObject -> pageUrl.startsWith(siteObject.getUrl()))
                 .findFirst();
-        if (siteObjectOptional.isPresent()) {
-            String name = siteObjectOptional.get().getName();
+        if (siteObjectOptional.isEmpty()) {
+            throw new IndexExecutionException(new ResultDTO(false, "Данная страница находится за пределами сайтов, указанных в конфигурационном файле")
+                    .getError());
+        } else {
             String url = siteObjectOptional.get().getUrl();
-            Site site = siteRepository.findByNameAndUrl(name, url).get();
+            Site site = siteRepository.findSiteByUrl(url).get();
             WebSiteAnalyzer.setOnePageIndexation(true);
             try {
                 updateDataIfReindexExecute(pageUrl, site.getId());
@@ -89,18 +90,18 @@ public class IndexingService {
             wsa.setMainPath(pageUrl);
             new ForkJoinPool().invoke(wsa);
             WebSiteAnalyzer.setOnePageIndexation(false);
+            log.info("Переиндексация завершена");
             return new ResultDTO(true);
-        } else {
-            throw new IndexExecutionException(new ResultDTO(false, "Данная страница находится за пределами сайтов, указанных в конфигурационном файле")
-                    .getError());
         }
     }
+
     private void updateSiteStatus(String message) {
         List<Site> sites = siteRepository.findAll().stream().filter(site -> site.getStatus() != Status.INDEXED).collect(Collectors.toList());
         if (!sites.isEmpty()) {
             sites.stream().mapToInt(Site::getId).forEach(id -> siteRepository.updateSiteStatusAndError(Status.FAILED, message, id));
         }
     }
+
     private void updateDataIfReindexExecute(String pageUrl, int siteId) throws RuntimeException {
         String regex = "https?:\\/\\/\\w+\\.\\w+(\\/.*)";
         Matcher matcher = Pattern.compile(regex).matcher(pageUrl);
@@ -115,7 +116,6 @@ public class IndexingService {
                 .map(Index::getLemma)
                 .map(Lemma::getId)
                 .forEach(lemmaRepository::minusLemmaFrequencyById);
-
     }
 }
 
