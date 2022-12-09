@@ -1,0 +1,27 @@
+{
+  "groups": [
+    {
+      "name": "externaldata",
+      "type": "com.kuzmich.searchengineapp.config.SiteConfig",
+      "sourceType": "com.kuzmich.searchengineapp.config.SiteConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "externaldata.referrer",
+      "type": "java.lang.String",
+      "sourceType": "com.kuzmich.searchengineapp.config.SiteConfig"
+    },
+    {
+      "name": "externaldata.site-array",
+      "type": "java.util.List<com.kuzmich.searchengineapp.config.SiteConfig$SiteObject>",
+      "sourceType": "com.kuzmich.searchengineapp.config.SiteConfig"
+    },
+    {
+      "name": "externaldata.user-agent",
+      "type": "java.lang.String",
+      "sourceType": "com.kuzmich.searchengineapp.config.SiteConfig"
+    }
+  ],
+  "hints": []
+}
