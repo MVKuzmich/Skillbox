@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <div class="Card" th:fragment="cardFragment">
+            <a class="Card-picture" href="/books/slug.html" th:href="@{'books/' + ${book.slug}}"><img th:src="${book.image}" alt="card.jpg"/>
+                <div class="Card-sale" th:if="${book.price > 0}" th:text="${#numbers.formatDecimal(book.price * 100, 1, 0)} + '% скидка'">30% скидка
+                </div>
+            </a>
+            <div class="Card-content">
+                <strong class="Card-title"><a href="/books/slug.html" th:href="@{'books/' + ${book.slug}}" th:text="${book.title}">Техника</a>
+                </strong>
+                <div th:each="author : ${book.authorSet}">
+                    <div class="Card-description" th:text="${author.name}">Кондратенко Валерий Петрович
+                    </div>
+                </div>
+                <div class="Card-cost">
+                            <span class="Card-priceOld" th:text="${book.priceOld}">₽300.00
+                            </span>
+                    <span class="Card-price" th:text="${book.discountPrice()}">₽190.00
+                            </span>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
