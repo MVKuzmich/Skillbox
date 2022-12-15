@@ -66,6 +66,7 @@ public class BookController {
         model.addAttribute("book", bookService.getBookBySlug(slug));
         model.addAttribute("starList", ratingService.calculateBookRating(slug));
         model.addAttribute("countRateList", ratingService.getCountRateList(slug));
+        model.addAttribute("bookReviewList", bookReviewService.getBookReviewList(slug));
         return "books/slug";
     }
 
