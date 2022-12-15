@@ -22,12 +22,12 @@ public class Page extends BaseEntity {
     private String path;
     @NotNull
     private int code;
-    @Column(name = "content", columnDefinition = "mediumtext")
+    @Column(name = "content", columnDefinition = "text")
     @NotNull
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "site_id")
+    @JoinColumn(name = "site_id", referencedColumnName = "id")
     private Site site;
 
     @OneToMany(mappedBy = "page", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

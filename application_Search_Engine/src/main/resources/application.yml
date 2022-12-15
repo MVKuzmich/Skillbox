@@ -6,8 +6,8 @@ spring:
   datasource:
     username: zero
     password: one
-    url: jdbc:mysql://localhost:3306/search_engine?allowPublicKeyRetrieval=true&useSSL=false
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:postgresql://localhost:5432/search_engine
+    driver-class-name: org.postgresql.Driver
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/changeset/db.changelog-master.xml

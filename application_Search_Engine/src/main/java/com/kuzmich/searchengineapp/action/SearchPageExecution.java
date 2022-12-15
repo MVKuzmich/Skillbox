@@ -56,6 +56,7 @@ public class SearchPageExecution {
     }
 
     public List<Lemma> findLemmasByWordsFromUserQuery(String userQuery) throws IOException {
+        long start = System.currentTimeMillis();
         List<Lemma> lemmaList = new ArrayList<>();
         LuceneMorphology luceneMorph = new RussianLuceneMorphology();
         String[] queryWords = userQuery.toLowerCase().trim().split(" ");
@@ -73,6 +74,9 @@ public class SearchPageExecution {
             lemmaList.addAll(formWords);
         }
         lemmaList.sort(Comparator.comparing(Lemma::getFrequency).thenComparing(Lemma::getLemma));
+        long end = System.currentTimeMillis();
+        long duration = end - start;
+        log.info("Перевод СЛОВ из запроса В ЛЕММУ - {} миллисекунд", duration);
         return lemmaList;
     }
 
@@ -86,7 +90,7 @@ public class SearchPageExecution {
             Index indexForSearchPageData = indexList.stream().filter(index -> index.getPage().getId() == id).findFirst()
                     .orElseThrow(() -> new RuntimeException("Something wrong"));
             Element elementBody = Jsoup.parse(indexForSearchPageData.getPage().getContent()).body();
-            float sumRank = (float) indexList.stream().filter(ind -> ind.getPage().getId() == id)
+            float sumRank = (float) indexList.stream().filter(ind -> ind.getPage().getId().intValue() == id.intValue())
                     .mapToDouble(Index::getRank).sum();
             if (sumRank > maxRank) {
                 maxRank = sumRank;
@@ -128,6 +132,7 @@ public class SearchPageExecution {
     }
 
     private Map<Integer, String> findWordsAndIndexesInTextByQueryLemmas(List<String> lemmaWordsFromUserQuery, Element element) throws IOException {
+        long start = System.currentTimeMillis();
         List<String> lemmaWords = new ArrayList<>(lemmaWordsFromUserQuery);
         String text = element.toString().toLowerCase();
         String parseText = element.text().toLowerCase();
@@ -146,6 +151,9 @@ public class SearchPageExecution {
                 break;
             }
         }
+        long end = System.currentTimeMillis();
+        long duration = end - start;
+        log.info("Поиск слов и их индексов в тексте по леммам - {} миллисекунд", duration);
         return index2word;
     }
 

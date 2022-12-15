@@ -13,11 +13,11 @@ import javax.validation.constraints.NotNull;
 public class Index extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "page_id")
+    @JoinColumn(name = "page_id", referencedColumnName = "id")
     @NotNull
     private Page page;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lemma_id")
+    @JoinColumn(name = "lemma_id", referencedColumnName = "id")
     @NotNull
     private Lemma lemma;
     @NotNull

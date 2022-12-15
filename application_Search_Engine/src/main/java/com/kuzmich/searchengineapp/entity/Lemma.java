@@ -21,7 +21,7 @@ public class Lemma extends BaseEntity {
     private int frequency;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "site_id")
+    @JoinColumn(name = "site_id", referencedColumnName = "id")
     @NotNull
     private Site site;
 
