@@ -1,9 +1,9 @@
 create table field
 (
-    id       INT          NOT NULL AUTO_INCREMENT,
+    id       serial          NOT NULL,
     name     VARCHAR(255) NOT NULL,
     selector VARCHAR(255) NOT NULL,
-    weight   FLOAT        NOT NULL,
+    weight   REAL        NOT NULL,
     primary key (id)
 );
 

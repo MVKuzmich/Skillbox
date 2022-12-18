@@ -50,10 +50,11 @@ public class PageIndexExecutor {
                         }
                         lemmaRankByTag = tagWeight * lemmaItem.getValue();
                         int lemmaIdForSearch = lemma.getId();
-                        Index index = indexList.stream().filter(i -> i.getLemma().getId() == lemmaIdForSearch).findFirst().orElse(null);
-                        if (index == null) {
+                        Optional<Index> indexOptional = indexList.stream().filter(i -> i.getLemma().getId() == lemmaIdForSearch).findFirst();
+                        if (indexOptional.isEmpty()) {
                             indexList.add(new Index(page, lemma, lemmaRankByTag));
                         } else {
+                            Index index = indexOptional.get();
                             index.setRank(index.getRank() + lemmaRankByTag);
                         }
                     }

@@ -9,15 +9,17 @@ import com.kuzmich.searchengineapp.repository.SiteRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.lucene.morphology.LuceneMorphology;
 import lombok.extern.log4j.Log4j2;
+import org.apache.lucene.morphology.Morphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -44,7 +46,7 @@ public class SearchPageExecution {
                 totalIndexList.removeIf(index -> !commonPageIds.contains(index.getPage().getId()));
             }
             if (site != null) {
-                totalIndexList.removeIf(index -> index.getPage().getSite().getId() != siteRepository.findSiteByUrl(site).get().getId());
+                totalIndexList.removeIf(index -> index.getPage().getSite().getId().intValue() != siteRepository.findSiteByUrl(site).get().getId().intValue());
             }
             return (!totalIndexList.isEmpty())
                     ? getSearchPageDataFromIndexes(totalIndexList, lemmaWordsFromUserQuery) : new ArrayList<>();
@@ -87,9 +89,9 @@ public class SearchPageExecution {
         List<Integer> pageIds = indexList.stream().map(Index::getPage).map(Page::getId).distinct().collect(Collectors.toList());
         for (Integer id : pageIds) {
             long startIndex = System.currentTimeMillis() / 1000;
-            Index indexForSearchPageData = indexList.stream().filter(index -> index.getPage().getId() == id).findFirst()
+            Index indexForSearchPageData = indexList.stream().filter(index -> index.getPage().getId().intValue() == id.intValue()).findFirst()
                     .orElseThrow(() -> new RuntimeException("Something wrong"));
-            Element elementBody = Jsoup.parse(indexForSearchPageData.getPage().getContent()).body();
+            Document document = Jsoup.parse(indexForSearchPageData.getPage().getContent());
             float sumRank = (float) indexList.stream().filter(ind -> ind.getPage().getId().intValue() == id.intValue())
                     .mapToDouble(Index::getRank).sum();
             if (sumRank > maxRank) {
@@ -101,7 +103,7 @@ public class SearchPageExecution {
                     .siteName(indexForSearchPageData.getPage().getSite().getName())
                     .uri(indexForSearchPageData.getPage().getPath())
                     .title(Jsoup.parse(indexForSearchPageData.getPage().getContent()).title())
-                    .snippet(createSnippetFromPage(lemmaWordsFromUserQuery, elementBody))
+                    .snippet(createSnippetFromPage(lemmaWordsFromUserQuery, document))
                     .relevance(sumRank)
                     .build();
             log.info("сниппет: {}, релевантность: {}", searchPageData.getSnippet(), searchPageData.getRelevance());
@@ -116,14 +118,10 @@ public class SearchPageExecution {
                 .collect(Collectors.toList());
     }
 
-    private String createSnippetFromPage(List<String> lemmaWordsFromUserQuery, Element textElement) throws IOException {
-        Map<Integer, String> index2textWord = findWordsAndIndexesInTextByQueryLemmas(lemmaWordsFromUserQuery, textElement);
-        String partHtml = index2textWord.keySet().stream().map(wordIndex -> textElement.toString().substring(wordIndex - 100, wordIndex + 100)).collect(Collectors.joining(" "));
-        String cleanSnippet = cleanUpHtml(partHtml);
-        for (String word : index2textWord.values()) {
-            cleanSnippet = cleanSnippet.replaceAll("\\b".concat(word), "<b>".concat(word).concat("</b>"));
-        }
-        return cleanSnippet;
+    private String createSnippetFromPage(List<String> lemmaWordsFromUserQuery, Document document) throws IOException {
+        List<String> partsForSnippet = findPartsForSnippet(lemmaWordsFromUserQuery, document);
+
+        return String.join("...", partsForSnippet);
     }
 
     private List<SearchPageData> updateSearchPageDataRelevance(float maxRank, List<SearchPageData> resultList) {
@@ -131,30 +129,34 @@ public class SearchPageExecution {
                 .collect(Collectors.toList());
     }
 
-    private Map<Integer, String> findWordsAndIndexesInTextByQueryLemmas(List<String> lemmaWordsFromUserQuery, Element element) throws IOException {
+    private List<String> findPartsForSnippet(List<String> lemmaWordsFromUserQuery, Document document) throws IOException {
         long start = System.currentTimeMillis();
+        List<String> partsForSnippet = new ArrayList<>();
+        Morphology morphology = new RussianLuceneMorphology();
         List<String> lemmaWords = new ArrayList<>(lemmaWordsFromUserQuery);
-        String text = element.toString().toLowerCase();
-        String parseText = element.text().toLowerCase();
-        Pattern pattern = Pattern.compile(createRegex(lemmaWords));
-        Matcher matcher = pattern.matcher(parseText);
-        TreeMap<Integer, String> index2word = new TreeMap<>();
-        while (matcher.find()) {
-            String word = matcher.group();
-            String normalWordForm = new RussianLuceneMorphology().getNormalForms(word).get(0);
-            if (lemmaWords.contains(normalWordForm)) {
-                log.info("лемма: {}, слово: {}", normalWordForm, word.toUpperCase());
-                index2word.put(text.indexOf(word), word);
-                lemmaWords.remove(normalWordForm);
-            }
-            if (lemmaWords.isEmpty()) {
-                break;
+        Elements elements = document.getElementsMatchingText(createRegex(lemmaWords));
+        for (Element element : elements) {
+            String sentence = "";
+            String parseText = element.text();
+            String[] arr = parseText.split("[\\s.,!:]+\\s*");
+            for (String word : arr) {
+                if (word.matches("[А-яЁё-]+")) {
+                    String normalWordForm = morphology.getNormalForms(word).get(0);
+                    if (lemmaWords.contains(normalWordForm)) {
+                        log.info("лемма: {}, слово: {}", normalWordForm, word.toUpperCase());
+                        partsForSnippet.add(findSentence(word, parseText));
+                        lemmaWords.remove(normalWordForm);
+                    }
+                    if (lemmaWords.isEmpty()) {
+                        break;
+                    }
+                }
             }
         }
         long end = System.currentTimeMillis();
         long duration = end - start;
         log.info("Поиск слов и их индексов в тексте по леммам - {} миллисекунд", duration);
-        return index2word;
+        return partsForSnippet;
     }
 
     private String createRegex(List<String> lemmaWords) {
@@ -162,20 +164,26 @@ public class SearchPageExecution {
                 .filter(word -> word.length() > 1)
                 .map(word -> word.substring(0, 1))
                 .collect(Collectors.joining("|"));
-        return "\\b".concat("(").concat(regexFirstLetter).concat(")").concat("([А-яЁё]+)(-\1)?");
+        return "(?i)\\b".concat("(").concat(regexFirstLetter).concat(")").concat("([А-яЁё]+)(-[А-яЁё]+)?");
     }
 
-    private String cleanUpHtml(String text) {
-        String regex = "(\"?(([А-яЁё\\d]+)(-\3|[\":;.,!?])?))\\s+?";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(text);
-        List<String> wordList = new ArrayList<>();
-        while (matcher.find()) {
-            wordList.add(matcher.group(1));
+
+    private String findSentence(String word, String text) {
+        String partForSnippet = "";
+        int maxPointFromWord = 100;
+        int indexWordFromSentenceStart = text.indexOf(word);
+        int lengthFromWordToSentenceEnd = (indexWordFromSentenceStart + word.length() == text.length()) ? 0 : text.substring(indexWordFromSentenceStart + word.length()).length();
+
+        if (indexWordFromSentenceStart > maxPointFromWord && lengthFromWordToSentenceEnd > maxPointFromWord) {
+            partForSnippet = text.substring(indexWordFromSentenceStart - maxPointFromWord, indexWordFromSentenceStart + maxPointFromWord);
+        } else if (indexWordFromSentenceStart < maxPointFromWord && lengthFromWordToSentenceEnd > maxPointFromWord) {
+            partForSnippet = text.substring(0, indexWordFromSentenceStart + maxPointFromWord);
+        } else if (indexWordFromSentenceStart > maxPointFromWord && lengthFromWordToSentenceEnd < maxPointFromWord) {
+            partForSnippet = text.substring(indexWordFromSentenceStart - maxPointFromWord);
         }
-        return String.join(" ", wordList);
-    }
 
+        return partForSnippet.replaceAll("\\b".concat(word), "<b>".concat(word).concat("</b>"));
+    }
 }
 
 

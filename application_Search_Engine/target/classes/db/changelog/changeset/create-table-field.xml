@@ -10,8 +10,7 @@
 		http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.9.xsd">
 
     <changeSet author="zero" id="create-table-field">
-        <sqlFile dbms="mysql"
-                 encoding="UTF-8"
+        <sqlFile encoding="UTF-8"
                  path="create-table-field.sql"
                  relativeToChangelogFile="true"
         />
