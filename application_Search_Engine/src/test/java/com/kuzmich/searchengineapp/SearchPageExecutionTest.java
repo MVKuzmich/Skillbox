@@ -3,9 +3,12 @@ package com.kuzmich.searchengineapp;
 import com.kuzmich.searchengineapp.action.SearchPageExecution;
 import com.kuzmich.searchengineapp.repository.LemmaRepository;
 import com.kuzmich.searchengineapp.repository.SiteRepository;
+import lombok.SneakyThrows;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -43,5 +46,22 @@ class SearchPageExecutionTest {
         }
 
     }
+
+
+    @ParameterizedTest
+    @CsvFileSource(resources = "/findSentenceTestData.csv", delimiter = '|', numLinesToSkip = 2)
+    void getSentenceTest(String word, String text, String expected) {
+        try {
+            Method method = SearchPageExecution.class.getDeclaredMethod(
+                    "getSentenceFromTextElement", String.class, String.class);
+            method.setAccessible(true);
+            assertThat(method.invoke(searchPageExecution, word, text)).isEqualTo(expected);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
 
 }

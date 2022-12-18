@@ -144,7 +144,7 @@ public class SearchPageExecution {
                     String normalWordForm = morphology.getNormalForms(word).get(0);
                     if (lemmaWords.contains(normalWordForm)) {
                         log.info("лемма: {}, слово: {}", normalWordForm, word.toUpperCase());
-                        partsForSnippet.add(findSentence(word, parseText));
+                        partsForSnippet.add(getSentenceFromTextElement(word, parseText));
                         lemmaWords.remove(normalWordForm);
                     }
                     if (lemmaWords.isEmpty()) {
@@ -168,7 +168,7 @@ public class SearchPageExecution {
     }
 
 
-    private String findSentence(String word, String text) {
+    private String getSentenceFromTextElement(String word, String text) {
         String partForSnippet = "";
         int maxPointFromWord = 100;
         int indexWordFromSentenceStart = text.indexOf(word);
@@ -180,6 +180,8 @@ public class SearchPageExecution {
             partForSnippet = text.substring(0, indexWordFromSentenceStart + maxPointFromWord);
         } else if (indexWordFromSentenceStart > maxPointFromWord && lengthFromWordToSentenceEnd < maxPointFromWord) {
             partForSnippet = text.substring(indexWordFromSentenceStart - maxPointFromWord);
+        } else {
+            partForSnippet = text;
         }
 
         return partForSnippet.replaceAll("\\b".concat(word), "<b>".concat(word).concat("</b>"));
