@@ -1,6 +1,7 @@
 package com.kuzmich.searchengineapp;
 
 import com.kuzmich.searchengineapp.action.SearchPageExecution;
+import com.kuzmich.searchengineapp.dto.searchDto.SearchPageData;
 import com.kuzmich.searchengineapp.repository.LemmaRepository;
 import com.kuzmich.searchengineapp.repository.SiteRepository;
 import lombok.SneakyThrows;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -40,7 +43,7 @@ class SearchPageExecutionTest {
         try {
             Method method = SearchPageExecution.class.getDeclaredMethod("createRegex", List.class);
             method.setAccessible(true);
-            assertThat(method.invoke(searchPageExecution, wordList)).isEqualTo("\\b(л|д)([А-яЁё]+)(-\1)?");
+            assertThat(method.invoke(searchPageExecution, wordList)).isEqualTo("(?i)\\b(л|д)([А-яЁё]+)(-\1)?");
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -59,9 +62,30 @@ class SearchPageExecutionTest {
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-
-
     }
 
+    @ParameterizedTest
+    @CsvSource(value = "10.0f:0.8f:0.2f:0.9f", delimiter = ':')
+    void updateRelevanceTest(float maxRank, double expected1, double expected2, double expected3) {
+        List<SearchPageData> list = List.of(
+                new SearchPageData("http://ya.ru", "Я", "/about", "О нас", "Что-то о нас", 8.0),
+                new SearchPageData("http://ya.ru", "Я", "/news", "Новости", "Свежие Новости", 2.0),
+                new SearchPageData("http://ya.ru", "Я", "/daynews", "Новости дня", "Свежие Новости Дня", 9.0)
+
+        );
+        List<SearchPageData> expected = List.of(
+                new SearchPageData("http://ya.ru", "Я", "/about", "О нас", "Что-то о нас", expected1),
+                new SearchPageData("http://ya.ru", "Я", "/news", "Новости", "Свежие Новости", expected2),
+                new SearchPageData("http://ya.ru", "Я", "/daynews", "Новости дня", "Свежие Новости Дня", expected3)
+        );
+
+        try {
+            Method method = SearchPageExecution.class.getDeclaredMethod("updateSearchPageDataRelevance", float.class, List.class);
+            method.setAccessible(true);
+            assertThat(method.invoke(searchPageExecution, maxRank, list)).isEqualTo(expected);
+        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
