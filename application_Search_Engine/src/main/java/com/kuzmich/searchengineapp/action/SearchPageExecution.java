@@ -121,7 +121,7 @@ public class SearchPageExecution {
     private String createSnippetFromPage(List<String> lemmaWordsFromUserQuery, Document document) throws IOException {
         List<String> partsForSnippet = findPartsForSnippet(lemmaWordsFromUserQuery, document);
 
-        return String.join("...", partsForSnippet);
+        return "...".concat(String.join("...", partsForSnippet));
     }
 
     private List<SearchPageData> updateSearchPageDataRelevance(float maxRank, List<SearchPageData> resultList) {
@@ -164,7 +164,7 @@ public class SearchPageExecution {
                 .filter(word -> word.length() > 1)
                 .map(word -> word.substring(0, 1))
                 .collect(Collectors.joining("|"));
-        return "(?i)\\b".concat("(").concat(regexFirstLetter).concat(")").concat("([А-яЁё]+)(-[А-яЁё]+)?");
+        return "(?i)\\b".concat("(").concat(regexFirstLetter).concat(")").concat("([А-яЁё]+)(-\1)?");
     }
 
 
