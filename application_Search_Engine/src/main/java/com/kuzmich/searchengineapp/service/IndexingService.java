@@ -1,5 +1,6 @@
 package com.kuzmich.searchengineapp.service;
 
+import com.kuzmich.searchengineapp.action.Lemmatizator;
 import com.kuzmich.searchengineapp.action.SitesConcurrencyIndexingExecutor;
 import com.kuzmich.searchengineapp.action.WebSiteAnalyzer;
 import com.kuzmich.searchengineapp.config.SiteConfig;
@@ -32,6 +33,7 @@ public class IndexingService {
     private final LemmaRepository lemmaRepository;
     private final FieldRepository fieldRepository;
     private final IndexRepository indexRepository;
+    private final Lemmatizator lemmatizator;
 
     public ResultDTO executeIndexation() throws IndexExecutionException, IndexInterruptedException {
         if (indexingExecutor.isExecuting()) {
@@ -85,7 +87,7 @@ public class IndexingService {
             } catch (RuntimeException ex) {
                 log.info(ex.getMessage());
             }
-            WebSiteAnalyzer wsa = new WebSiteAnalyzer(pageRepository, lemmaRepository, indexRepository, fieldRepository, siteRepository, siteConfig);
+            WebSiteAnalyzer wsa = new WebSiteAnalyzer(pageRepository, lemmaRepository, indexRepository, fieldRepository, siteRepository, siteConfig, lemmatizator);
             wsa.setSite(site);
             wsa.setMainPath(pageUrl);
             new ForkJoinPool().invoke(wsa);

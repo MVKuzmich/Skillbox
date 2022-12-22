@@ -1,10 +1,12 @@
 package com.kuzmich.searchengineapp;
 
+import com.kuzmich.searchengineapp.action.Lemmatizator;
 import com.kuzmich.searchengineapp.action.SearchPageExecution;
 import com.kuzmich.searchengineapp.dto.searchDto.SearchPageData;
 import com.kuzmich.searchengineapp.repository.LemmaRepository;
 import com.kuzmich.searchengineapp.repository.SiteRepository;
 import lombok.SneakyThrows;
+import org.apache.lucene.morphology.LuceneMorphology;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,10 +32,13 @@ class SearchPageExecutionTest {
     @Mock
     private SiteRepository siteRepository;
 
+    @Mock
+    private LuceneMorphology luceneMorphology;
+
 
     @BeforeEach
     void prepare() {
-        searchPageExecution = new SearchPageExecution(lemmaRepository, siteRepository);
+        searchPageExecution = new SearchPageExecution(lemmaRepository, siteRepository, luceneMorphology);
     }
 
 

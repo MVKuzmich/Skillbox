@@ -21,6 +21,7 @@ public class PageIndexExecutor {
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
     private final SiteRepository siteRepository;
+    private final Lemmatizator lemmatizator;
 
     public void executePageIndexing(Page page, Document htmlDocument) throws IOException {
             if (!WebSiteAnalyzer.isIndexationStopped()) {
@@ -32,7 +33,7 @@ public class PageIndexExecutor {
                 for (Field field : fieldList) {
                     float tagWeight = field.getWeight();
                     String wordsFromPageContentByTag = htmlDocument.getElementsByTag(field.getSelector()).text().toLowerCase();
-                    Map<String, Integer> mapLemmasByTag = new Lemmatizator().getLemmaList(wordsFromPageContentByTag);
+                    Map<String, Integer> mapLemmasByTag = lemmatizator.getLemmaList(wordsFromPageContentByTag);
                     Set<Map.Entry<String, Integer>> setLemmasByTag = mapLemmasByTag.entrySet();
                     float lemmaRankByTag;
                     for (Map.Entry<String, Integer> lemmaItem : setLemmasByTag) {

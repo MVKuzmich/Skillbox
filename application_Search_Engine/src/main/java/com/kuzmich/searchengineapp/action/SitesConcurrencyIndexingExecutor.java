@@ -28,6 +28,7 @@ public class SitesConcurrencyIndexingExecutor {
     private final LemmaRepository lemmaRepository;
     private final IndexRepository indexRepository;
     private final FieldRepository fieldRepository;
+    private final Lemmatizator lemmatizator;
 
     @Setter
     @Getter
@@ -43,7 +44,7 @@ public class SitesConcurrencyIndexingExecutor {
             siteObjects.stream().map(siteObject -> {
                         Optional<Site> foundSite = siteRepository.findSiteByUrl(siteObject.getUrl());
                         foundSite.ifPresent(site -> siteRepository.removeSiteById(site.getId()));
-                        WebSiteAnalyzer siteAnalyzer = new WebSiteAnalyzer(pageRepository, lemmaRepository, indexRepository, fieldRepository, siteRepository, siteConfig);
+                        WebSiteAnalyzer siteAnalyzer = new WebSiteAnalyzer(pageRepository, lemmaRepository, indexRepository, fieldRepository, siteRepository, siteConfig, lemmatizator);
                         Site site = getSite(siteObject);
                         siteAnalyzer.setSite(site);
                         siteAnalyzer.setMainPath(site.getUrl());

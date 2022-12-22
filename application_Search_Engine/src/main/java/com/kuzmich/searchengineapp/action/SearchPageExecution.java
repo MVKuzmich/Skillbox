@@ -29,6 +29,7 @@ public class SearchPageExecution {
 
     private final LemmaRepository lemmaRepository;
     private final SiteRepository siteRepository;
+    private final LuceneMorphology luceneMorphology;
 
     public List<SearchPageData> getSearchResultListFromUserQuery(String userQuery, String site) {
         try {
@@ -60,15 +61,14 @@ public class SearchPageExecution {
     public List<Lemma> findLemmasByWordsFromUserQuery(String userQuery) throws IOException {
         long start = System.currentTimeMillis();
         List<Lemma> lemmaList = new ArrayList<>();
-        LuceneMorphology luceneMorph = new RussianLuceneMorphology();
         String[] queryWords = userQuery.toLowerCase().trim().split(" ");
 
         for (String word : queryWords) {
-            if (luceneMorph.getMorphInfo(word).stream().anyMatch(i -> i.contains("ПРЕДЛ") || i.contains("СОЮЗ")
+            if (luceneMorphology.getMorphInfo(word).stream().anyMatch(i -> i.contains("ПРЕДЛ") || i.contains("СОЮЗ")
                     || i.contains("ЧАСТ") || i.contains("МЕЖД"))) {
                 continue;
             }
-            List<Lemma> formWords = luceneMorph.getNormalForms(word.toLowerCase(Locale.ROOT)).get(0).lines()
+            List<Lemma> formWords = luceneMorphology.getNormalForms(word.toLowerCase(Locale.ROOT)).get(0).lines()
                     .map(lemmaRepository::findLemmaObjectByLemmaName)
                     .filter(Optional::isPresent)
                     .flatMap(lemmaListOpt -> lemmaListOpt.get().stream())
@@ -132,7 +132,6 @@ public class SearchPageExecution {
     private List<String> findPartsForSnippet(List<String> lemmaWordsFromUserQuery, Document document) throws IOException {
         long start = System.currentTimeMillis();
         List<String> partsForSnippet = new ArrayList<>();
-        Morphology morphology = new RussianLuceneMorphology();
         List<String> lemmaWords = new ArrayList<>(lemmaWordsFromUserQuery);
         Elements elements = document.getElementsMatchingText(createRegex(lemmaWords));
         for (Element element : elements) {
@@ -141,7 +140,7 @@ public class SearchPageExecution {
             String[] arr = parseText.split("[\\s.,!:]+\\s*");
             for (String word : arr) {
                 if (word.matches("[А-яЁё-]+")) {
-                    String normalWordForm = morphology.getNormalForms(word).get(0);
+                    String normalWordForm = luceneMorphology.getNormalForms(word).get(0);
                     if (lemmaWords.contains(normalWordForm)) {
                         log.info("лемма: {}, слово: {}", normalWordForm, word.toUpperCase());
                         partsForSnippet.add(getSentenceFromTextElement(word, parseText));
