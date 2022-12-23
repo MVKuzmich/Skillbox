@@ -65,7 +65,7 @@ public class WebSiteAnalyzer extends RecursiveAction {
                 Page page = savePageToDatabase(createPage(response));
                 log.info("SAVED page: {}, pageId: {}", page.getPath(), page.getId());
 
-//                executePageIndexation(page, response.parse());
+                executePageIndexation(page, response.parse());
 
                 Set<String> links = findRelatedPageLinks(response.parse());
                 if (!links.isEmpty()) {

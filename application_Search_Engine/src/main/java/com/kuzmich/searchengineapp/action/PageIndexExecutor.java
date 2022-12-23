@@ -28,30 +28,16 @@ public class PageIndexExecutor {
                 log.info("Индексируется {}", page.getPath());
                 long start = System.currentTimeMillis() / 1_000L;
                 List<Index> indexList = new ArrayList<>();
-                List<Field> fieldList = fieldRepository.findAll();
                 Site site = page.getSite();
-                for (Field field : fieldList) {
-                    float tagWeight = field.getWeight();
-                    String wordsFromPageContentByTag = htmlDocument.getElementsByTag(field.getSelector()).text().toLowerCase();
-                    Map<String, Integer> mapLemmasByTag = lemmatizator.getLemmaList(wordsFromPageContentByTag);
-                    Set<Map.Entry<String, Integer>> setLemmasByTag = mapLemmasByTag.entrySet();
+                for (Field field : fieldRepository.findAll()) {
+                    String wordsFromPageTagContent = htmlDocument.getElementsByTag(field.getSelector()).text().toLowerCase();
+                    Map<String, Integer> lemmasFromPageTagWords = lemmatizator.getLemmaList(wordsFromPageTagContent);
                     float lemmaRankByTag;
-                    for (Map.Entry<String, Integer> lemmaItem : setLemmasByTag) {
-                        Lemma lemma;
-                        synchronized (lemmaRepository) {
-                            Optional<Lemma> lemmaOptional = lemmaRepository.findLemmaObjectByLemmaNameAndSiteId(lemmaItem.getKey(), site.getId());
-                            if (lemmaOptional.isEmpty()) {
-                                lemma = lemmaRepository.saveAndFlush(
-                                        new Lemma(lemmaItem.getKey(), 1, site));
-                            } else {
-                                lemma = lemmaOptional.get();
-                                lemma.setFrequency(lemma.getFrequency() + 1);
-                                lemma = lemmaRepository.saveAndFlush(lemma);
-                            }
-                        }
-                        lemmaRankByTag = tagWeight * lemmaItem.getValue();
-                        int lemmaIdForSearch = lemma.getId();
-                        Optional<Index> indexOptional = indexList.stream().filter(i -> i.getLemma().getId() == lemmaIdForSearch).findFirst();
+                    for (Map.Entry<String, Integer> lemmaItem : lemmasFromPageTagWords.entrySet()) {
+                        Lemma lemma = saveLemma(lemmaItem, site);
+                        lemmaRankByTag = field.getWeight() * lemmaItem.getValue();
+                        int lemmaIdForIndexSearch = lemma.getId();
+                        Optional<Index> indexOptional = indexList.stream().filter(i -> i.getLemma().getId() == lemmaIdForIndexSearch).findFirst();
                         if (indexOptional.isEmpty()) {
                             indexList.add(new Index(page, lemma, lemmaRankByTag));
                         } else {
@@ -67,6 +53,22 @@ public class PageIndexExecutor {
                 long indexPageDuration = end - start;
                 log.info("ИНДЕКСАЦИЯ СТРАНИЦЫ: id - {}, path - {}, ДЛИТЕЛЬНОСТЬ: {}", page.getId(), page.getPath(), indexPageDuration);
             }
+    }
+
+    private Lemma saveLemma(Map.Entry<String, Integer> lemmaItem, Site site) {
+        Lemma lemma;
+        synchronized (lemmaRepository) {
+            Optional<Lemma> lemmaOptional = lemmaRepository.findLemmaObjectByLemmaNameAndSiteId(lemmaItem.getKey(), site.getId());
+            if (lemmaOptional.isEmpty()) {
+                lemma = lemmaRepository.saveAndFlush(
+                        new Lemma(lemmaItem.getKey(), 1, site));
+            } else {
+                lemma = lemmaOptional.get();
+                lemma.setFrequency(lemma.getFrequency() + 1);
+                lemma = lemmaRepository.saveAndFlush(lemma);
+            }
+        }
+        return lemma;
     }
 }
 
