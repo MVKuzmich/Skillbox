@@ -1,4 +1,4 @@
-package com.example.bookshopapp.data.book.file.enums;
+package com.example.bookshopapp.data.enums;
 
 public enum BookFileType {
 

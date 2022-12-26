@@ -1,7 +1,8 @@
 package com.example.bookshopapp.data.user;
 
 
-import com.example.bookshopapp.data.book.file.enums.ContactType;
+import com.example.bookshopapp.data.enums.ContactType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,12 +17,15 @@ public class UserContactEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
-    @Column(name = "user_id", columnDefinition = "INT NOT NULL")
-    private int userId;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private UserEntity user;
 
-    @Column(name = "current_contact_type", columnDefinition = "contact_type")
+//    @Column(name = "current_contact_type", columnDefinition = "contact_type")
+    @Column(name = "current_contact_type")
+    @Enumerated(EnumType.STRING)
     private ContactType type;
 
     @Column(columnDefinition = "SMALLINT NOT NULL")
@@ -33,13 +37,19 @@ public class UserContactEntity {
     @Column(name = "code_trials", columnDefinition = "INT")
     private int codeTrials;
 
-    @Column(columnDefinition = "TIMESTAMP")
+    @Column(name = "code_time", columnDefinition = "TIMESTAMP")
     private LocalDateTime codeTime;
 
     @Column(columnDefinition = "VARCHAR(255) NOT NULL")
     private String contact;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private UserEntity user;
+    public UserContactEntity(UserEntity user, ContactType type, short approved, String code, int codeTrials, LocalDateTime codeTime, String contact) {
+        this.user = user;
+        this.type = type;
+        this.approved = approved;
+        this.code = code;
+        this.codeTrials = codeTrials;
+        this.codeTime = codeTime;
+        this.contact = contact;
+    }
 }

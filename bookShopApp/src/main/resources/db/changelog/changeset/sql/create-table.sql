@@ -93,13 +93,11 @@ create table users
     primary key (id)
 );
 
-CREATE
-TYPE contact_type as ENUM ('phone', 'email');
 create table user_contact
 (
     id          serial       NOT NULL,
     user_id     INT          NOT NULL,
-    current_contact_type contact_type NOT NULL,
+    current_contact_type varchar(20),
     approved    smallint     NOT NULL,
     code        VARCHAR(255),
     code_trials INT,

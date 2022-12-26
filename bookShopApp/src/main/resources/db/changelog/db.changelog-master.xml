@@ -24,6 +24,7 @@
     <include file="db/changelog/changeset/insert-data-book_rates.xml"/>
     <include file="db/changelog/changeset/insert-data-book_review.xml"/>
     <include file="db/changelog/changeset/insert-data-book_review_like.xml"/>
+    <include file="db/changelog/changeset/insert-data-user_contact.xml"/>
 
 
 

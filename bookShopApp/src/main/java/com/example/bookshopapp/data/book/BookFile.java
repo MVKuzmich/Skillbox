@@ -1,7 +1,7 @@
 package com.example.bookshopapp.data.book;
 
 
-import com.example.bookshopapp.data.book.file.enums.BookFileType;
+import com.example.bookshopapp.data.enums.BookFileType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
