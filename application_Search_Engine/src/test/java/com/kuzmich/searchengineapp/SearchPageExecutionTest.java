@@ -11,15 +11,14 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvFileSource;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -42,9 +41,9 @@ class SearchPageExecutionTest {
     }
 
 
-    @Test
-    void createRegexTest() {
-        List<String> wordList = List.of("лучший", "друг");
+    @ParameterizedTest
+    @MethodSource("getArgumentsForCreateRegexTest")
+    void createRegexTest(List<String> wordList, String expected) {
         try {
             Method method = SearchPageExecution.class.getDeclaredMethod("createRegex", List.class);
             method.setAccessible(true);
@@ -53,6 +52,12 @@ class SearchPageExecutionTest {
             e.printStackTrace();
         }
 
+    }
+    static Stream<Arguments> getArgumentsForCreateRegexTest() {
+        return Stream.of(
+                Arguments.of(List.of("лучший", "друг"), "(?i)\\b(л|д)([А-яЁё]+)(-\1)?"),
+                Arguments.of(List.of("я", "лучший", "друг"), "(?i)\\b(л|д)([А-яЁё]+)(-\1)?")
+        );
     }
 
 

@@ -6,6 +6,8 @@ import org.apache.lucene.morphology.LuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -27,14 +29,12 @@ public class LemmatizatorTest {
         lemmatizator = new Lemmatizator(luceneMorphology);
     }
 
-
     @SneakyThrows
-    @Test
-    void countLemmasAfterLemmatizator() {
-        String text = "конюшня бывает из дерева и покрашена краской";
-
+    @ParameterizedTest
+    @ValueSource(strings = {"конюшня бывает из дерева и покрашена краской", "да будет свет", "мы вместе"})
+    void countLemmasAfterLemmatizator(String text) {
         Map<String, Integer> result = lemmatizator.getLemmaList(text);
-        assertThat(result.keySet()).hasSize(5);
+        assertThat(result.keySet()).isNotEmpty();
 
 
     }
