@@ -2,10 +2,7 @@ package com.example.simpleshop.entity;
 
 import com.example.simpleshop.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,7 +17,8 @@ import java.util.List;
  */
 @Entity
 @Data
-@ToString(exclude = {"userRates", "userReviews"})
+@ToString(exclude = {"userRates", "userReviews", "purchaseCartList", "userDeliveries"})
+@EqualsAndHashCode(of = "email")
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
@@ -37,8 +35,14 @@ public class User {
     private Role role;
 
     @OneToMany(mappedBy = "user")
+    private List<PurchaseCart> purchaseCartList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
     private List<Rate> userRates = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Review> userReviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<Delivery> userDeliveries = new ArrayList<>();
 }
