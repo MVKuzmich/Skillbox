@@ -14,13 +14,11 @@ import com.example.simpleshop.mapper.UserDeliveryMapper;
 import com.example.simpleshop.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,13 +41,13 @@ public class PurchaseService {
         User user = userRepository.findByEmail(principal.getName()).orElseThrow();
         int count = purchaseCartRepository.countUserCartWithNullDelivery(user.getId());
         if (count != 0) {
-            throw new CartExistException("You need open purchase cart!");
+            throw new CartExistException("You have an opened purchase cart!");
         } else {
             PurchaseCart purchaseCart = new PurchaseCart();
             purchaseCart.setUser(user);
             purchaseCart.setCreateDate(LocalDateTime.now());
             purchaseCart = purchaseCartRepository.saveAndFlush(purchaseCart);
-            return cartReadMapper.map(purchaseCart);
+            return cartReadMapper.toCartReadDto(purchaseCart);
         }
     }
 
@@ -72,7 +70,7 @@ public class PurchaseService {
                 })
                 .orElseThrow();
 
-        return cartReadMapper.map(purchaseCart);
+        return cartReadMapper.toCartReadDto(purchaseCart);
 
     }
 
@@ -84,13 +82,13 @@ public class PurchaseService {
         Delivery delivery = new Delivery();
         delivery.setUser(user);
         delivery.setCreateDate(LocalDateTime.now());
-        Delivery saveDelivery = deliveryRepository.save(delivery);
+        deliveryRepository.saveAndFlush(delivery);
+        delivery.setPurchaseCart(purchaseCart);
         purchaseCart.setDelivery(delivery);
-        purchaseCart = purchaseCartRepository.save(purchaseCart);
-        return new DeliveryReadDto(saveDelivery.getId(),
+        return new DeliveryReadDto(delivery.getId(),
                 purchaseCart.getPurchaseList().stream()
-                        .map(purchaseReadMapper::map)
+                        .map(purchaseReadMapper::toPurchaseReadDto)
                         .collect(Collectors.toList()),
-                userDeliveryMapper.map(user));
+                userDeliveryMapper.toUserDeliveryDto(user));
     }
 }

@@ -26,7 +26,7 @@ public class PurchaseCart {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @OneToOne(mappedBy = "purchaseCart")
+    @OneToOne
     private Delivery delivery;
 
     @OneToMany(mappedBy = "purchaseCart", cascade = CascadeType.ALL)

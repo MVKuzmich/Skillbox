@@ -2,17 +2,13 @@ package com.example.simpleshop.mapper;
 
 import com.example.simpleshop.dto.PurchaseReadDto;
 import com.example.simpleshop.entity.Purchase;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class PurchaseReadMapper implements Mapper<Purchase, PurchaseReadDto> {
-    @Override
-    public PurchaseReadDto map(Purchase fromObject) {
-        return new PurchaseReadDto(
-                fromObject.getId(),
-                fromObject.getProduct().getName(),
-                fromObject.getProductAmount(),
-                fromObject.getTotalPrice()
-        );
-    }
+@Mapper(componentModel = "spring", uses = {ProductReadMapper.class})
+public interface PurchaseReadMapper {
+
+    @Mapping(target = "productName", source = "product.name")
+    @Mapping(target = "id", source = "id")
+    PurchaseReadDto toPurchaseReadDto(Purchase purchase);
 }

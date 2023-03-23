@@ -41,7 +41,7 @@ public class UserService implements UserDetailsService {
         return Optional.of(userDto)
                 .map(userCreateEditMapper::map)
                 .map(userRepository::save)
-                .map(userReadMapper::map)
+                .map(userReadMapper::toUserReadDto)
                 .orElseThrow();
     }
 }

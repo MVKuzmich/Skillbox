@@ -2,26 +2,14 @@ package com.example.simpleshop.mapper;
 
 import com.example.simpleshop.dto.CartReadDto;
 import com.example.simpleshop.entity.PurchaseCart;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-import java.util.stream.Collectors;
 
-@Component
-@RequiredArgsConstructor
-public class CartReadMapper implements Mapper<PurchaseCart, CartReadDto> {
+@Mapper(componentModel = "spring", uses = {UserReadMapper.class, PurchaseReadMapper.class, PurchaseListMapper.class})
+public interface CartReadMapper {
 
-    private final PurchaseReadMapper purchaseReadMapper;
-    private final UserReadMapper userReadMapper;
+    @Mapping(target = "userReadDto", source = "user")
+    CartReadDto toCartReadDto(PurchaseCart purchaseCart);
 
-    @Override
-    public CartReadDto map(PurchaseCart fromObject) {
-        return new CartReadDto(
-                fromObject.getId(),
-                fromObject.getCreateDate(),
-                fromObject.getPurchaseList().stream()
-                        .map(purchaseReadMapper::map)
-                        .collect(Collectors.toList()),
-                userReadMapper.map(fromObject.getUser()));
-    }
 }

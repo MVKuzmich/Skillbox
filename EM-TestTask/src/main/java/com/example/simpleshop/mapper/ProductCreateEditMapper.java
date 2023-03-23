@@ -2,8 +2,7 @@ package com.example.simpleshop.mapper;
 
 import com.example.simpleshop.dto.DiscountCreateEditDto;
 import com.example.simpleshop.dto.ProductCreateEditDto;
-import com.example.simpleshop.dto.ProductReadDto;
-import com.example.simpleshop.entity.Company;
+
 import com.example.simpleshop.entity.Discount;
 import com.example.simpleshop.entity.Product;
 import com.example.simpleshop.repository.CompanyRepository;

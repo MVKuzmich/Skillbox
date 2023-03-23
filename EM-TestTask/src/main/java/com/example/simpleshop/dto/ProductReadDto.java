@@ -10,9 +10,9 @@ public class ProductReadDto {
     Long id;
     String name;
     String description;
-    String organizationName;
+    CompanyReadDto companyReadDto;
     BigDecimal price;
     Long quantityInStore;
-    Integer discountValue;
+    DiscountReadDto discountReadDto;
 
 }

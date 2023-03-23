@@ -22,19 +22,18 @@ public class ProductService {
 
 
     private final ProductRepository productRepository;
-    private final DiscountRepository discountRepository;
-    private final ProductReadMapper productReadMapper;
     private final ProductCreateEditMapper productCreateEditMapper;
+    private final ProductReadMapper productReadMapper;
 
     public List<ProductReadDto> getAllProducts() {
         return productRepository.findAll().stream()
-                .map(productReadMapper::map)
+                .map(productReadMapper::toProductReadDto)
                 .collect(Collectors.toList());
     }
 
     public Optional<ProductReadDto> getById(Long id) {
         return productRepository.findById(id)
-                .map(productReadMapper::map);
+                .map(productReadMapper::toProductReadDto);
 
     }
 
@@ -44,7 +43,7 @@ public class ProductService {
         return Optional.of(productDto)
                 .map(productCreateEditMapper::map)
                 .map(productRepository::save)
-                .map(productReadMapper::map)
+                .map(productReadMapper::toProductReadDto)
                 .orElseThrow();
     }
 
@@ -53,7 +52,7 @@ public class ProductService {
         return productRepository.findById(productId)
                 .map(entity -> productCreateEditMapper.map(productDto, entity))
                 .map(productRepository::saveAndFlush)
-                .map(productReadMapper::map);
+                .map(productReadMapper::toProductReadDto);
     }
 
     @Transactional
@@ -73,7 +72,7 @@ public class ProductService {
         return productRepository.findById(productId)
                 .map(entity -> productCreateEditMapper.mapWithDiscountOnly(discountDto, entity))
                 .map(productRepository::saveAndFlush)
-                .map(productReadMapper::map);
+                .map(productReadMapper::toProductReadDto);
 
     }
 

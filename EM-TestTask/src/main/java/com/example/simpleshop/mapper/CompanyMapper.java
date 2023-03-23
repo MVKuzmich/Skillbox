@@ -2,15 +2,12 @@ package com.example.simpleshop.mapper;
 
 import com.example.simpleshop.dto.CompanyReadDto;
 import com.example.simpleshop.entity.Company;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 
-@Component
-public class CompanyMapper implements Mapper<Company, CompanyReadDto> {
-    @Override
-    public CompanyReadDto map(Company fromObject) {
-        return new CompanyReadDto(
-                fromObject.getId(),
-                fromObject.getName()
-        );
-    }
+
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+public interface CompanyMapper {
+
+    CompanyReadDto toCompanyReadDto(Company company);
 }
