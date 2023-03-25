@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class DeliveryMapper implements Mapper<Delivery, DeliveryReadDto> {
 
     private final PurchaseReadMapper purchaseReadMapper;
-    private final UserDeliveryMapper userDeliveryMapper;
+    private final UserMinInfoMapper userMinInfoMapper;
     @Override
     public DeliveryReadDto map(Delivery fromObject) {
         return new DeliveryReadDto(
@@ -24,7 +24,7 @@ public class DeliveryMapper implements Mapper<Delivery, DeliveryReadDto> {
                 fromObject.getCreateDate(),
                 fromObject.getPurchaseList().stream()
                         .map(purchaseReadMapper::toPurchaseReadDto).collect(Collectors.toList()),
-                userDeliveryMapper.toUserDeliveryDto(fromObject.getUser())
+                userMinInfoMapper.toUserMinInfoDto(fromObject.getUser())
         );
     }
 }

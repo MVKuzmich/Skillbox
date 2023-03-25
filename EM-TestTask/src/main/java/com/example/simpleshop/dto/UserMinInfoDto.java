@@ -2,10 +2,8 @@ package com.example.simpleshop.dto;
 
 import lombok.Value;
 
-import java.math.BigDecimal;
-
 @Value
-public class UserDeliveryDto {
+public class UserMinInfoDto {
     Long id;
     String username;
     String email;
