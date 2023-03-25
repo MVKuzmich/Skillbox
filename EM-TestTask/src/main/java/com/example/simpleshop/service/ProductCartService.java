@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -59,7 +58,7 @@ public class ProductCartService {
         User user = getUser(principal);
 
         ProductCart productCart = Optional.ofNullable(user.getProductCart())
-                .orElseThrow(() -> new ProductCardNotFoundException("Product cart is not found! Create!"));
+                .orElseThrow(() -> new ProductCartNotFoundException("Product cart is not found! Create!"));
 
         Product product = productRepository.findByName(cartItemCreateDto.getProductName()).stream()
                 .filter(prod -> prod.getQuantityInStore() >= cartItemCreateDto.getProductAmount())

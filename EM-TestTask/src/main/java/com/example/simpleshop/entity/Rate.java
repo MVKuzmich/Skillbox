@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -22,4 +24,14 @@ public class Rate {
     private Product product;
 
     private Integer value;
+
+    @Column(name = "create_date")
+    private LocalDateTime createDate;
+
+    public Rate(User user, Product product, Integer value, LocalDateTime createDate) {
+        this.user = user;
+        this.product = product;
+        this.value = value;
+        this.createDate = createDate;
+    }
 }
