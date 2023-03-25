@@ -13,7 +13,7 @@ import java.util.List;
 
 @Entity
 @Data
-@ToString(exclude = {"productRates", "productReviews"})
+@ToString(exclude = {"productRates", "productReviews", "cartItemList"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "products")
@@ -48,6 +48,9 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Review> productReviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<CartItem> cartItemList = new ArrayList<>();
 
 
 

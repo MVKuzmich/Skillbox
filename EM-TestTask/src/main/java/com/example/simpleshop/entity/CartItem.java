@@ -1,11 +1,9 @@
 package com.example.simpleshop.entity;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 
 import java.math.BigDecimal;
 
@@ -13,26 +11,27 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Purchase {
+public class CartItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 
-    @Column(name = "product_amount")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id")
+    private ProductCart productCart;
+
     private Integer productAmount;
 
-    @Column(name = "total_price")
     private BigDecimal totalPrice;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Delivery delivery;
-
-
+    public CartItem(Product product, ProductCart productCart, Integer productAmount, BigDecimal totalPrice) {
+        this.product = product;
+        this.productCart = productCart;
+        this.productAmount = productAmount;
+        this.totalPrice = totalPrice;
+    }
 }

@@ -5,7 +5,6 @@ import com.example.simpleshop.dto.ProductCreateEditDto;
 import com.example.simpleshop.dto.ProductReadDto;
 import com.example.simpleshop.mapper.ProductCreateEditMapper;
 import com.example.simpleshop.mapper.ProductReadMapper;
-import com.example.simpleshop.repository.DiscountRepository;
 import com.example.simpleshop.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,6 @@ public class ProductService {
                 .map(productReadMapper::toProductReadDto);
 
     }
-
 
     @Transactional
     public ProductReadDto create(ProductCreateEditDto productDto) {

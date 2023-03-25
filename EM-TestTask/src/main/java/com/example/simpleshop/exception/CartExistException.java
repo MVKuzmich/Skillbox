@@ -1,4 +1,4 @@
-package com.example.simpleshop;
+package com.example.simpleshop.exception;
 
 public class CartExistException extends RuntimeException{
 

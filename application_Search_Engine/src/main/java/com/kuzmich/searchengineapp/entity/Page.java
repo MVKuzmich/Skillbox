@@ -27,9 +27,9 @@ public class Page extends BaseEntity {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "site_id", referencedColumnName = "id")
     private Site site;
 
+    @Builder.Default
     @OneToMany(mappedBy = "page", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<com.kuzmich.searchengineapp.entity.Index> indexList = new ArrayList<>();
 

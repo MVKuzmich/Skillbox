@@ -5,10 +5,9 @@ import com.example.simpleshop.entity.Purchase;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {ProductReadMapper.class})
+@Mapper(componentModel = "spring", uses = ProductMinInfoMapper.class)
 public interface PurchaseReadMapper {
 
     @Mapping(target = "productName", source = "product.name")
-    @Mapping(target = "id", source = "id")
     PurchaseReadDto toPurchaseReadDto(Purchase purchase);
 }

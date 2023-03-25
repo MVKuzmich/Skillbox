@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Entity
 @Data
-@ToString(exclude = {"userRates", "userReviews", "purchaseCartList", "userDeliveries"})
+@ToString(exclude = {"userRates", "userReviews", "purchaseList", "userDeliveries"})
 @EqualsAndHashCode(of = "email")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,8 +34,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToOne
+    ProductCart productCart;
+
     @OneToMany(mappedBy = "user")
-    private List<PurchaseCart> purchaseCartList = new ArrayList<>();
+    private List<Purchase> purchaseList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Rate> userRates = new ArrayList<>();

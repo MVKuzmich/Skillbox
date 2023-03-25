@@ -12,10 +12,10 @@ import java.util.List;
 
 @Entity
 @Data
-@ToString(exclude = "purchaseList")
+@ToString(exclude = "productList")
 @NoArgsConstructor
 @AllArgsConstructor
-public class PurchaseCart {
+public class ProductCart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,14 +23,10 @@ public class PurchaseCart {
 
     private LocalDateTime createDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
+    private LocalDateTime paidDate;
 
-    @OneToOne
-    private Delivery delivery;
-
-    @OneToMany(mappedBy = "purchaseCart", cascade = CascadeType.ALL)
-    private List<Purchase> purchaseList = new ArrayList<>();
+    @OneToMany(mappedBy = "productCart", cascade = CascadeType.REMOVE)
+    private List<CartItem> productList = new ArrayList<>();
 
 
 

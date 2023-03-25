@@ -4,11 +4,15 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
+@ToString(exclude = "purchaseList")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Delivery {
@@ -17,15 +21,16 @@ public class Delivery {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "purchase_cart_id", referencedColumnName = "id")
-    private PurchaseCart purchaseCart;
-
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     private LocalDateTime createDate;
 
+    @OneToMany(mappedBy = "delivery")
+    private List<Purchase> purchaseList = new ArrayList<>();
 
-
+    public Delivery(User user, LocalDateTime createDate) {
+        this.user = user;
+        this.createDate = createDate;
+    }
 }

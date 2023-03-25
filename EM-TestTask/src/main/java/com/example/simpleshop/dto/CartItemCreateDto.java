@@ -3,7 +3,7 @@ package com.example.simpleshop.dto;
 import lombok.Value;
 
 @Value
-public class PurchaseCreateDto {
+public class CartItemCreateDto {
     String productName;
     Integer productAmount;
 }

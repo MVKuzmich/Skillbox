@@ -50,6 +50,7 @@ public class ProductCreateEditMapper implements Mapper<ProductCreateEditDto, Pro
 
     private Discount getDiscount(Integer discountValue, Integer discountDuration) {
         return discountRepository.findByValueAndDuration(discountValue, discountDuration)
-                .orElse(discountRepository.saveAndFlush(new Discount(discountValue, discountDuration)));
+                .stream().findFirst()
+                .orElseGet(() -> discountRepository.saveAndFlush(new Discount(discountValue, discountDuration)));
     }
 }
