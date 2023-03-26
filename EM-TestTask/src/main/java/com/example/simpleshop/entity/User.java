@@ -6,7 +6,9 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /*
 - Информация о пользователе состоит из:
@@ -17,7 +19,8 @@ import java.util.List;
  */
 @Entity
 @Data
-@ToString(exclude = {"userRates", "userReviews", "purchaseList", "userDeliveries"})
+@ToString(exclude = {"userRates", "userReviews", "purchaseList",
+        "userDeliveries", "messageSendingList"})
 @EqualsAndHashCode(of = "email")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -48,4 +51,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Delivery> userDeliveries = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<MessageSending> messageSendingList = new ArrayList<>();
 }
