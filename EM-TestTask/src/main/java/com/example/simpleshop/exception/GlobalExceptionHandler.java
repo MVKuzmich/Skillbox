@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,7 +25,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(getErrorsMap(errors), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {CartExistException.class, CartItemExistException.class, CartNotFoundException.class,
+    @ExceptionHandler(value = {ResponseStatusException.class, CartExistException.class, CartItemExistException.class, CartNotFoundException.class,
     ProductCartNotFoundException.class, ProductNotBuyException.class, ProductNotFoundException.class})
     public ResponseEntity<Map<String, List<String>>> handleExceptionRuntimeChild(RuntimeException ex) {
         List<String> errors = Collections.singletonList(ex.getMessage());
