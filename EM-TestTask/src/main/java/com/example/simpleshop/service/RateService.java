@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.crypto.spec.OAEPParameterSpec;
 import java.security.Principal;
 import java.time.LocalDateTime;
 
@@ -35,6 +36,12 @@ public class RateService {
                 .map(rateRepository::save)
                 .map(rateReadMapper::toRateReadDto)
                 .orElseThrow(() -> new ProductNotBuyException("You can't rate product! Buy it!"));
+    }
+
+    public RateReadDto findById(Long rateId) {
+        return rateRepository.findById(rateId)
+                .map(rateReadMapper::toRateReadDto)
+                .orElseThrow();
     }
 }
 

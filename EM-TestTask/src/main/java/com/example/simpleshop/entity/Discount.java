@@ -1,10 +1,7 @@
 package com.example.simpleshop.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
@@ -19,7 +16,7 @@ import java.util.List;
 @Data
 @ToString(exclude = "discountProducts")
 @NoArgsConstructor
-@AllArgsConstructor()
+@AllArgsConstructor
 @Table(name = "discounts")
 public class Discount {
 

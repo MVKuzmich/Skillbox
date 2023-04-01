@@ -1,10 +1,7 @@
 package com.example.simpleshop.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,6 +12,7 @@ import java.util.List;
 @ToString(exclude = "productList")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ProductCart {
 
     @Id
@@ -25,7 +23,9 @@ public class ProductCart {
 
     private LocalDateTime paidDate;
 
+
     @OneToMany(mappedBy = "productCart", cascade = CascadeType.REMOVE)
+    @Builder.Default
     private List<CartItem> productList = new ArrayList<>();
 
 

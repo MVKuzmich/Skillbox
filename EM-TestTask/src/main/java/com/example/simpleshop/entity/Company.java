@@ -1,10 +1,7 @@
 package com.example.simpleshop.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +19,7 @@ import java.util.List;
 @ToString(exclude = "products")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Company {
 
     @Id
@@ -32,6 +30,7 @@ public class Company {
     private String logo;
 
     @OneToMany(mappedBy = "company")
+    @Builder.Default
     List<Product> products = new ArrayList<>();
 
 

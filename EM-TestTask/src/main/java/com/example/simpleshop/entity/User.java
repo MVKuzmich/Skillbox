@@ -25,6 +25,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,25 +34,30 @@ public class User {
     private String email;
     private String password;
     private BigDecimal balance;
-
     @Enumerated(EnumType.STRING)
     private Role role;
+
 
     @OneToOne
     ProductCart productCart;
 
     @OneToMany(mappedBy = "user")
+    @Builder.Default
     private List<Purchase> purchaseList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
+    @Builder.Default
     private List<Rate> userRates = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
+    @Builder.Default
     private List<Review> userReviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
+    @Builder.Default
     private List<Delivery> userDeliveries = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
+    @Builder.Default
     private List<MessageSending> messageSendingList = new ArrayList<>();
 }
