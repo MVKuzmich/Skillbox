@@ -32,11 +32,7 @@ import static org.mockito.Mockito.*;
 @Transactional
 class RateServiceIT extends IntegrationTestBase {
 
-    @Autowired
-    private RateService rateService;
-
-    @Autowired
-    private RateReadMapper rateReadMapper;
+    private final RateService rateService;
 
     @Test
     void addRateMethodIT() {
