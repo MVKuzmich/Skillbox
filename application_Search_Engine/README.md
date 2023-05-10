@@ -14,6 +14,7 @@ _____
 - Spring Boot, Spring Data JPA(Hibernate)
 - библиотеки Lombok, JSOUP, LuceneMorphology
 - Liquibase
+- Docker
 _____________
 ### Для запуска приложения необходимо:
 - скачать и установить [Docker](https://www.docker.com) - удобная платформа для автоматического развертывания и управления приложением;
