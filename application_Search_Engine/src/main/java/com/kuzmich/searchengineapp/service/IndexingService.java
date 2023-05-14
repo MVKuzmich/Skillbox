@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
@@ -48,6 +49,7 @@ public class IndexingService {
             } catch (IndexInterruptedException ex) {
                 WebSiteAnalyzer.setIndexationStopped(true);
                 exceptionMessage = ex.getMessage();
+                log.error(Arrays.toString(ex.getStackTrace()));
                 throw ex;
             } finally {
                 if (!exceptionMessage.isBlank()) {
