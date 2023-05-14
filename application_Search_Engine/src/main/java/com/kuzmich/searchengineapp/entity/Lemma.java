@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "lemma", indexes = @Index(columnList = "lemma, site_id"))
+@Table(name = "lemma", indexes = @Index(columnList = "lemma, site_id", unique = true))
 public class Lemma extends BaseEntity {
 
     @NotNull
