@@ -4,32 +4,39 @@ services:
     image: mikhailkuzmich/search-engine-app
     container_name: search-engine
     ports:
-      - '8080:8080'
+      - "8080:8080"
     environment:
-      - spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-      - spring.datasource.url=jdbc:mysql://mysqldb:3308/search_engine?allowPublicKeyRetrieval=true&useSSL=false
+      APP_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/search_engine
+      SPRING_APPLICATION_JSON: '{
+      "externaldata": {
+        "site-array": [
+          {"url": "https://imkliva.by", "name": "страховая компания"},
+          {"url": "https://www.svetlovka.ru", "name": "Библиотека"}
+          ]
+        }
+      }'
     networks:
-      - springmysql-net
+      - app-net
 #    restart: always
     depends_on:
-      - mysqldb
-  mysqldb:
-    image: mysql:8.0.25
-    container_name: mysql
-    expose:
-      - '3308'
+      - db
+  db:
+    image: postgres
+    container_name: postgres_db
     networks:
-      - springmysql-net
+      - app-net
 #    restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=one
-      - MYSQL_DATABASE=search_engine
-      - MYSQL_USER=zero
-      - MYSQL_PASSWORD=one
+      POSTGRES_DB: search_engine
+      POSTGRES_USER: zero
+      POSTGRES_PASSWORD: one
     ports:
-      - '3308:3308'
+      - "5432:5432"
     volumes:
-      - 'D:/docker-db-volume:/var/lib/mysql'
+      - /d/db-search-engine/:/var/lib/postgresql/data
 networks:
-  springmysql-net:
+  app-net:
     driver: bridge
+#volumes:
+#  db-volume:

@@ -1,8 +1,26 @@
 server:
   port: 8080
-  contextPath: /admin
-
+externaldata:
+  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36
+  referrer: https://www.google.com
+  site-array:
+    - url: https://imkliva.by
+      name: Страховая компания
+    - url: https://www.svetlovka.ru
+      name: ЦГМБ им.М.А.Светлова
+logging:
+  level:
+    org:
+      hibernate:
+        type: info
 spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: true
   datasource:
     username: zero
     password: one
@@ -11,19 +29,13 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/changeset/db.changelog-master.xml
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
   thymeleaf:
     prefix: classpath:/templates/
   web:
     resources:
       static-locations: classpath:/static/
-externaldata:
-  user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36
-  referrer: https://www.google.com
-  site-array:
+
+
     #    - url: http://www.playback.ru
     #      name: Интернет-магазин
     #    - url: https://ipfran.ru
@@ -34,11 +46,7 @@ externaldata:
     #      name: Вышний Волочек
     #    - url: https://dombulgakova.ru
     #      name: Булгаковский дом
-    - url: https://nikoartgallery.com
-      name: Галерея Никогосяна
+    #    - url: https://nikoartgallery.com
+    #      name: Галерея Никогосяна
     #    - url: https://www.svetlovka.ru
     #      name: ЦГМБ им.М.А.Светлова
-    #    - url: https://imkliva.by
-    #      name: Страховая компания
-    - url: https://et-cetera.ru/mobile/
-      name: Театр
