@@ -32,11 +32,11 @@ public class SearchController {
         }
     }
 
-        @GetMapping("/search/page/{searchWord}")
-        @ResponseBody
-        public BooksPageDto getNextSearchPage (@RequestParam("offset") Integer offset,
-                                               @RequestParam("limit") Integer limit,
-                                               @PathVariable(value = "searchWord", required = false) SearchWordDto searchWordDto){
-            return new BooksPageDto(bookService.getPageOfSearchResultsBooks(searchWordDto.getExample(), offset, limit).getContent());
-        }
+//        @GetMapping("/search/page/{searchWord}")
+//        @ResponseBody
+//        public BooksPageDto getNextSearchPage (@RequestParam("offset") Integer offset,
+//                                               @RequestParam("limit") Integer limit,
+//                                               @PathVariable(value = "searchWord", required = false) SearchWordDto searchWordDto){
+//            return new BooksPageDto(bookService.getPageOfSearchResultsBooks(searchWordDto.getExample(), offset, limit).getContent());
+//        }
 }

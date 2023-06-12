@@ -2,53 +2,46 @@ package com.example.bookshopapp.service;
 
 import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.data.bookrate.BookRateEntity;
-import com.example.bookshopapp.repository.BookRepository;
+import com.example.bookshopapp.dto.RateRangeDto;
 import com.example.bookshopapp.repository.RatingRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RatingService {
 
-    private static final int MAX_STAR_COUNT = 5;
+    private final RatingRepository ratingRepository;
 
-    private RatingRepository ratingRepository;
-    private BookRepository bookRepository;
-
-    public RatingService(RatingRepository ratingRepository, BookRepository bookRepository) {
-        this.ratingRepository = ratingRepository;
-        this.bookRepository = bookRepository;
-    }
-
+    @Transactional
     public BookRateEntity save(Book book, Integer value) {
         return ratingRepository.saveAndFlush(new BookRateEntity(book, value));
     }
 
-    public String[] calculateBookRating(String slug) {
-        String[] result = new String[MAX_STAR_COUNT];
-        Book book = bookRepository.findBySlug(slug);
-        Set<BookRateEntity> bookRates = book.getBookRateList();
-        double sumRates = bookRates.stream().map(BookRateEntity::getValue).mapToInt(Integer::intValue).sum();
-        int rating = (int) Math.round(sumRates / bookRates.size());
-
-        for (int i = 0; i < result.length; i++) {
-            result[i] = (i < rating) ? "star" : "no";
-        }
-        return result;
-    }
-
-    public List<Integer> getCountRateList(String slug) {
-        List<Integer> countRateList = new ArrayList<>();
-        Book book = bookRepository.findBySlug(slug);
+    public List<RateRangeDto> getBookRateRangeList(String bookSlug) {
+        List<RateRangeDto> rateRangeList = ratingRepository.findRateRangeForBook(bookSlug);
         IntStream.rangeClosed(1, 5).forEach(item -> {
-            int count = (int)book.getBookRateList().stream().filter(rate -> rate.getValue() == item).count();
-            countRateList.add(count);
+            if (rateRangeList.stream().noneMatch(rateRangeDto -> rateRangeDto.getRateValue() == item)) {
+                rateRangeList.add(new RateRangeDto() {
+                    @Override
+                    public Integer getRateValue() {
+                        return item;
+                    }
+
+                    @Override
+                    public Integer getRateCount() {
+                        return 0;
+                    }
+                });
+            }
         });
-        return countRateList;
+        rateRangeList.sort(Comparator.comparing(RateRangeDto::getRateValue).reversed());
+        return rateRangeList;
     }
 }

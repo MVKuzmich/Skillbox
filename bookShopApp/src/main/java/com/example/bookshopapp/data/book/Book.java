@@ -1,6 +1,10 @@
 package com.example.bookshopapp.data.book;
 
 import com.example.bookshopapp.data.author.Author;
+import com.example.bookshopapp.data.book.file.FileDownloadEntity;
+import com.example.bookshopapp.data.book.links.Book2AuthorEntity;
+import com.example.bookshopapp.data.book.links.Book2TagEntity;
+import com.example.bookshopapp.data.book.links.Book2UserEntity;
 import com.example.bookshopapp.data.book.review.BookReviewEntity;
 import com.example.bookshopapp.data.bookrate.BookRateEntity;
 import com.example.bookshopapp.data.genre.GenreEntity;
@@ -10,9 +14,7 @@ import com.example.bookshopapp.data.user.UserEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -22,6 +24,9 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "books")
 @Getter @Setter @NoArgsConstructor
+@EqualsAndHashCode(of = {"id", "slug"})
+@ToString(exclude = {"book2AuthorEntitySet", "book2TagEntitySet", "genreSet", "bookFileList",
+"book2UserEntitySet", "fileDownloadEntitySet", "transactionSet", "bookReviewSet", "bookRateList"})
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,15 +53,12 @@ public class Book {
 
     @JsonProperty("author")
     @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "book2author",
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name ="author_id"))
-    private Set<Author> authorSet;
+    @OneToMany(mappedBy = "book")
+    private Set<Book2AuthorEntity> book2AuthorEntitySet = new HashSet<>();
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "bookSet", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<TagEntity> tagSet = new HashSet<>();
+    @OneToMany(mappedBy = "book")
+    private Set<Book2TagEntity> book2TagEntitySet = new HashSet<>();
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -70,18 +72,12 @@ public class Book {
     private List<BookFile> bookFileList = new ArrayList<>();
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "book2user",
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name ="user_id"))
-    private Set<UserEntity> userSet;
+    @OneToMany(mappedBy = "book")
+    private Set<Book2UserEntity> book2UserEntitySet = new HashSet<>();
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "file_download",
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name ="user_id"))
-    private Set<UserEntity> userDownloadBookSet;
+    @OneToMany(mappedBy = "book")
+    private Set<FileDownloadEntity> fileDownloadEntitySet = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

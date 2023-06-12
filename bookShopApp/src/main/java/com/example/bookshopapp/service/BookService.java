@@ -1,73 +1,39 @@
 package com.example.bookshopapp.service;
 
 import com.example.bookshopapp.data.book.Book;
-import com.example.bookshopapp.dto.BooksPageDto;
+import com.example.bookshopapp.dto.BookDto;
+import com.example.bookshopapp.dto.BookUnitDto;
 import com.example.bookshopapp.errors.BookstoreApiWrongParameterException;
-import com.example.bookshopapp.repository.BookRepository;
-import org.apache.catalina.WebResource;
-import org.apache.coyote.Request;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.bookshopapp.mapper.BookMapper;
+import com.example.bookshopapp.dto.AuthorDto;
+import com.example.bookshopapp.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BookService {
 
-    BookRepository bookRepository;
+    private final BookRepository bookRepository;
+    private final BookReviewRepository reviewRepository;
+    private final TagRepository tagRepository;
+    private final BookFileRepository bookFileRepository;
+    private final BookMapper bookMapper;
 
-    @Autowired
-    public BookService(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
-    }
 
-    public List<Book> getBooksData() {
-        return bookRepository.findAll();
-    }
-
-    public Page<Book> getPageOfRecommendedBooks(Integer offset, Integer limit) {
-        Pageable nextPage = PageRequest.of(offset, limit);
-        return bookRepository.findAll(nextPage);
-
-    }
-
-    public Page<Book> getPageOfRecentBooks(Integer offset, Integer limit) {
-        Pageable nextPage = PageRequest.of(offset, limit);
-        return bookRepository.findAllOrderByPubDateDesc(nextPage);
-    }
-
-    public Page<Book> getPageOfPopularBooks(Integer offset, Integer limit) {
-        Pageable nextPage = PageRequest.of(offset, limit);
-        return bookRepository.findAllByPopularity(nextPage);
-    }
 
     public Page<Book> getPageOfSearchResultsBooks(String searchWord, Integer offset, Integer limit) {
         Pageable nextPage = PageRequest.of(offset, limit);
         return bookRepository.findBookByTitleContaining(searchWord, nextPage);
-    }
-
-    public Page<Book> getPageOfRecentBooksBetweenDesc(LocalDate fromDate, LocalDate endDate, Integer offset, Integer limit) {
-        if (fromDate == null && endDate == null) {
-            return getPageOfRecentBooks(offset, limit);
-        } else {
-            if (fromDate == null) {
-                fromDate = LocalDate.of(1500, 1, 1);
-            }
-            if (endDate == null) {
-                endDate = LocalDate.now();
-            }
-            return bookRepository.findAllByPubDateBetweenDesc(fromDate, endDate, PageRequest.of(offset, limit));
-        }
-    }
-
-    public Page<Book> getBooksByTagId(Integer tagId, Integer offset, Integer limit) {
-        return bookRepository.findBooksByTagId(tagId, PageRequest.of(offset, limit));
     }
 
     public Book getBookBySlug(String slug) {
@@ -122,4 +88,57 @@ public class BookService {
     public Book getBookByBookId(Integer bookId) {
         return bookRepository.findById(bookId).get();
     }
+
+
+    public List<AuthorDto> getAuthors(Integer bookId) {
+        return bookRepository.findAuthorsByBookId(bookId);
+
+    }
+
+    public BookUnitDto getBookUnitDtoByBookSlug(String slug) {
+        return bookRepository.findBookUnitBySlug(slug)
+                .map(bookUnitModelDto -> bookMapper.toBookUnitDto(bookUnitModelDto,
+                        getAuthors(bookUnitModelDto.getId()),
+                        reviewRepository.findReviewsByBookId(bookUnitModelDto.getId()),
+                        tagRepository.findTagsByBookId(bookUnitModelDto.getId()),
+                        bookFileRepository.findBookFileByBookId(bookUnitModelDto.getId())))
+                .orElseThrow();
+
+    }
+
+    public Page<BookDto> getRecommendedBooks(Integer offset, Integer limit) {
+        return bookRepository.findAllRecommendedBooks(PageRequest.of(offset, limit))
+                .map(modelDto -> bookMapper.toBookDto(modelDto, getAuthors(modelDto.getId())));
+
+    }
+
+    public Page<BookDto> getRecentBooks(Integer offset, Integer limit) {
+        return bookRepository.findAllRecentBooks(PageRequest.of(offset, limit))
+                .map(modelDto -> bookMapper.toBookDto(modelDto, getAuthors(modelDto.getId())));
+    }
+    public Page<BookDto> getRecentBooksBetweenDesc(LocalDate fromDate, LocalDate endDate, Integer offset, Integer limit) {
+        if (fromDate == null && endDate == null) {
+            return getRecentBooks(offset, limit);
+        } else {
+            if (fromDate == null) {
+                fromDate = LocalDate.of(1500, 1, 1);
+            }
+            if (endDate == null) {
+                endDate = LocalDate.now();
+            }
+            return bookRepository.findAllRecentBooksBetween(fromDate, endDate, PageRequest.of(offset, limit))
+                    .map(modelDto -> bookMapper.toBookDto(modelDto, getAuthors(modelDto.getId())));
+        }
+    }
+    public Page<BookDto> getPopularBooks(Integer offset, Integer limit) {
+        return bookRepository.findPopularBooks(PageRequest.of(offset, limit))
+                .map(modelDto -> bookMapper.toBookDto(modelDto, getAuthors(modelDto.getId())));
+    }
+
+    public Page<BookDto> getBooksByTagId(Integer tagId, Integer offset, Integer limit) {
+        return bookRepository.findBooksByTagId(tagId, PageRequest.of(offset, limit))
+                .map(bookModelDto -> bookMapper.toBookDto(bookModelDto, getAuthors(bookModelDto.getId())));
+    }
+
+
 }

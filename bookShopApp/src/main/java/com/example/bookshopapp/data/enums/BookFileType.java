@@ -2,7 +2,7 @@ package com.example.bookshopapp.data.enums;
 
 public enum BookFileType {
 
-    PDF(".pdf"), EPUB(".epub"), FB2("fb2");
+    PDF(".pdf"), EPUB(".epub"), FB2(".fb2");
 
     private final String fileExtensionString;
 

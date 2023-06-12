@@ -13,7 +13,7 @@ public class Book2UserTypeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(columnDefinition = "VARCHAR(255) NOT NULL")
     private String code;

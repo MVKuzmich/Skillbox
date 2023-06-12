@@ -1,8 +1,10 @@
 package com.example.bookshopapp.controllers;
 
 import com.example.bookshopapp.data.book.Book;
+import com.example.bookshopapp.dto.BookDto;
 import com.example.bookshopapp.dto.SearchWordDto;
 import com.example.bookshopapp.service.BookService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,29 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-public class PopularController {
+@RequiredArgsConstructor
+public class PopularController extends BaseController {
 
     private final BookService bookService;
 
-    @Autowired
-    public PopularController(BookService bookService) {
-        this.bookService = bookService;
-    }
 
     @ModelAttribute("popularBooks")
-    public List<Book> popularBooks() {
-        return bookService.getPageOfPopularBooks(0, 20).getContent();
+    public List<BookDto> popularBooks() {
+        return bookService.getPopularBooks(0, 20).getContent();
     }
 
-    @ModelAttribute("searchWordDto")
-    public SearchWordDto searchWordDto() {
-        return new SearchWordDto();
-    }
-
-    @ModelAttribute("searchResults")
-    public List<Book> searchResults() {
-        return new ArrayList<>();
-    }
 
     @GetMapping("/popular")
     public String popularPage() {

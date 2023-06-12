@@ -1,5 +1,7 @@
 package com.example.bookshopapp.data.book.links;
 
+import com.example.bookshopapp.data.book.Book;
+import com.example.bookshopapp.data.user.UserEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,19 +16,22 @@ public class Book2UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(columnDefinition = "TIMESTAMP NOT NULL")
     private LocalDateTime time;
 
-    @Column(name = "type_id", columnDefinition = "INT NOT NULL")
-    private int typeId;
+    @OneToOne
+    @JoinColumn(name = "type_id", columnDefinition = "INT NOT NULL")
+    private Book2UserTypeEntity type;
 
-    @Column(name = "book_id", columnDefinition = "INT NOT NULL")
-    private int bookId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", columnDefinition = "INT NOT NULL")
+    private Book book;
 
-    @Column(name = "user_id", columnDefinition = "INT NOT NULL")
-    private int userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", columnDefinition = "INT NOT NULL")
+    private UserEntity user;
 
 
 }

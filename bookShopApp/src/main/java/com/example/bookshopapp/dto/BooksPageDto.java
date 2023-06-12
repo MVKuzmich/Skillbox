@@ -10,9 +10,9 @@ import java.util.List;
 public class BooksPageDto {
 
     private Integer count;
-    private List<Book> books;
+    private List<BookDto> books;
 
-    public BooksPageDto(List<Book> books) {
+    public BooksPageDto(List<BookDto> books) {
         this.books = books;
         this.count = books.size();
 

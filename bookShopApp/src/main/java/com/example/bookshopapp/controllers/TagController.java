@@ -1,45 +1,20 @@
 package com.example.bookshopapp.controllers;
 
-import com.example.bookshopapp.data.book.Book;
-import com.example.bookshopapp.data.tag.TagEntity;
 import com.example.bookshopapp.dto.BooksPageDto;
-import com.example.bookshopapp.dto.SearchWordDto;
-import com.example.bookshopapp.dto.TagDto;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.TagService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Controller
-public class TagController {
+@RequiredArgsConstructor
+public class TagController extends BaseController {
 
-    private TagService tagService;
-    private BookService bookService;
+    private final TagService tagService;
+    private final BookService bookService;
 
-    public TagController(TagService tagService, BookService bookService) {
-        this.tagService = tagService;
-        this.bookService = bookService;
-    }
-    @ModelAttribute("searchWordDto")
-    public SearchWordDto searchWordDto() {
-        return new SearchWordDto();
-    }
-
-    @ModelAttribute("searchResults")
-    public List<Book> searchResults() {
-        return new ArrayList<>();
-    }
-
-    @ModelAttribute("tags")
-    public List<TagDto> tagList() {
-        return tagService.getAllTagsDto();
-    }
 
 
     @GetMapping("/tags/{tagId}")
@@ -53,8 +28,8 @@ public class TagController {
     @GetMapping("/books/tag/{tagId}")
     @ResponseBody
     public BooksPageDto getBooksByTagPage(@PathVariable("tagId") Integer tagId,
-                                        @RequestParam("offset") Integer offset,
-                                        @RequestParam("limit") Integer limit) {
+                                          @RequestParam("offset") Integer offset,
+                                          @RequestParam("limit") Integer limit) {
 
         return new BooksPageDto(bookService.getBooksByTagId(tagId, offset, limit).getContent());
     }

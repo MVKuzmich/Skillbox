@@ -2,21 +2,27 @@ package com.example.bookshopapp.service;
 
 import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.data.genre.GenreEntity;
+import com.example.bookshopapp.dto.BookDto;
 import com.example.bookshopapp.dto.GenreDto;
+import com.example.bookshopapp.mapper.BookMapper;
+import com.example.bookshopapp.repository.AuthorRepository;
+import com.example.bookshopapp.repository.BookRepository;
 import com.example.bookshopapp.repository.GenreRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class GenreService {
 
-    private GenreRepository genreRepository;
-
-    public GenreService(GenreRepository genreRepository) {
-        this.genreRepository = genreRepository;
-    }
+    private final GenreRepository genreRepository;
+    private final BookRepository bookRepository;
+    private final BookMapper bookMapper;
 
     public List<GenreDto> getAllGenres() {
         List<GenreEntity> rootEntityList = genreRepository.findAllRootElements();
@@ -57,7 +63,7 @@ public class GenreService {
 
     }
 
-    public List<Book> getAllBooksByGenre(String slug, Integer offset, Integer limit) {
+    public List<BookDto> getAllBooksByGenre(String slug, Integer offset, Integer limit) {
         List<Book> bookList;
         GenreEntity genreEntity = genreRepository.findBySlug(slug);
         if(genreRepository.findFirstDescendants(genreEntity.getId()).isEmpty()) {
@@ -66,6 +72,7 @@ public class GenreService {
             bookList = new ArrayList<>(getBookListByGenre(genreEntity, new HashSet<>()));
         }
         return bookList.stream()
+                .map(book -> bookMapper.toBookDto(book, bookRepository.findAuthorsByBookId(book.getId())))
                 .skip((offset < 1) ? offset : (long) offset * limit)
                 .limit(limit)
                 .collect(Collectors.toList());

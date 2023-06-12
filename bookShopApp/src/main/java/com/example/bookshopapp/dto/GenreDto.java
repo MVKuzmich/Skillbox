@@ -2,18 +2,18 @@ package com.example.bookshopapp.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
 
 import java.util.*;
 
-@Getter
-@Setter
+@Value
 public class GenreDto {
-    private Integer id;
-    private Integer parentId;
-    private String slug;
-    private String name;
-    private Set<GenreDto> children;
-    private Integer bookCount;
+    Integer id;
+    Integer parentId;
+    String slug;
+    String name;
+    Set<GenreDto> children;
+    Integer bookCount;
 
     public GenreDto(Integer id, Integer parentId, String slug, String name, Integer bookCount) {
         this.id = id;

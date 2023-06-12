@@ -1,5 +1,7 @@
 package com.example.bookshopapp.data.book.links;
 
+import com.example.bookshopapp.data.book.Book;
+import com.example.bookshopapp.data.tag.TagEntity;
 import lombok.*;
 
 import javax.persistence.*;
@@ -14,9 +16,11 @@ public class Book2TagEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "book_id")
-    private Integer bookId;
-    @Column(name = "tag_id")
-    private Integer tagId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Book book;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private TagEntity tag;
 
 }

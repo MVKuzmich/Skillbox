@@ -1,6 +1,7 @@
 package com.example.bookshopapp.data.book;
 
 
+import com.example.bookshopapp.data.book.file.BookFileTypeEntity;
 import com.example.bookshopapp.data.enums.BookFileType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -20,8 +21,9 @@ public class BookFile {
     private Integer id;
     private String hash;
 
-    @Column(name = "type_id")
-    private int typeId;
+    @OneToOne
+    @JoinColumn(name = "type_id")
+    private BookFileTypeEntity fileType;
 
     private String path;
 
@@ -29,10 +31,10 @@ public class BookFile {
     @JoinColumn(name = "book_id", referencedColumnName = "id")
     private Book book;
 
-    @JsonProperty
-    public String getBookFileExtensionString() {
-        return BookFileType.getExtensionStringByTypeId(typeId);
-    }
+//    @JsonProperty
+//    public String getBookFileExtensionString() {
+//        return BookFileType.getExtensionStringByTypeId(typeId);
+//    }
 
 
 }

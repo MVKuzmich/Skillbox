@@ -1,5 +1,7 @@
 package com.example.bookshopapp.data.book.links;
 
+import com.example.bookshopapp.data.author.Author;
+import com.example.bookshopapp.data.book.Book;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,16 +16,18 @@ public class Book2AuthorEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
-    @Column(name="book_id", columnDefinition = "INT NOT NULL")
-    private int bookId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="book_id", columnDefinition = "INT NOT NULL")
+    private Book book;
 
-    @Column(name="author_id", columnDefinition = "INT NOT NULL")
-    private int authorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="author_id", columnDefinition = "INT NOT NULL")
+    private Author author;
 
     @Column(name="sort_index", columnDefinition = "INT NOT NULL  DEFAULT 0")
-    private int sortIndex;
+    private Integer sortIndex;
 
 
 }

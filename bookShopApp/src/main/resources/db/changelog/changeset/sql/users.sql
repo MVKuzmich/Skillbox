@@ -998,3 +998,4 @@ insert into users (hash, reg_time, balance, name) values ('89-532-4447', '2021-0
 insert into users (hash, reg_time, balance, name) values ('35-423-1295', '2022-07-17', 0, 'Noel Arnaudot');
 insert into users (hash, reg_time, balance, name) values ('29-202-6747', '2020-12-20', 0, 'Marianne Kemster');
 insert into users (hash, reg_time, balance, name) values ('96-642-5731', '2022-01-10', 0, 'Dorthea Terzo');
+insert into users (hash, reg_time, balance, name) values ('97-6427-57317', '2023-01-01', 0, 'Mikhail Kuzmich');

@@ -5,11 +5,16 @@ import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.data.book.review.BookReviewEntity;
 import com.example.bookshopapp.data.book.review.BookReviewLikeEntity;
 import com.example.bookshopapp.data.user.UserEntity;
-import com.example.bookshopapp.dto.SearchWordDto;
+import com.example.bookshopapp.dto.BookRateCreateDto;
+import com.example.bookshopapp.dto.BookReviewCreateDto;
+import com.example.bookshopapp.dto.RateRangeDto;
+import com.example.bookshopapp.dto.ReviewRateDto;
 import com.example.bookshopapp.service.*;
+import com.sun.xml.bind.v2.TODO;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,50 +28,31 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 @Controller
 @RequestMapping("/books")
 @Slf4j
-public class BookController {
+@RequiredArgsConstructor
+public class BookController extends BaseController {
 
-    private BookService bookService;
-    private ResourceStorage storage;
-    private RatingService ratingService;
-    private BookReviewService bookReviewService;
-    private UserService userService;
-    private BookReviewLikeService bookReviewLikeService;
+    private final BookService bookService;
+    private final ResourceStorage storage;
+    private final RatingService ratingService;
+    private final BookReviewService bookReviewService;
 
-    @Autowired
-    public BookController(BookService bookService, ResourceStorage storage, RatingService ratingService,
-                          BookReviewService bookReviewService, UserService userService, BookReviewLikeService bookReviewLikeService) {
-        this.bookService = bookService;
-        this.storage = storage;
-        this.ratingService = ratingService;
-        this.bookReviewService = bookReviewService;
-        this.userService = userService;
-        this.bookReviewLikeService = bookReviewLikeService;
-    }
-
-    @ModelAttribute("searchWordDto")
-    public SearchWordDto searchWordDto() {
-        return new SearchWordDto();
-    }
-
-    @ModelAttribute("searchResults")
-    public List<Book> searchResults() {
-        return new ArrayList<>();
-    }
+    private final UserService userService;
+    private final BookReviewLikeService bookReviewLikeService;
 
 
     @GetMapping("/{slug}")
     public String chosenBookPage(@PathVariable("slug") String slug, Model model) {
-        model.addAttribute("book", bookService.getBookBySlug(slug));
-        model.addAttribute("starList", ratingService.calculateBookRating(slug));
-        model.addAttribute("countRateList", ratingService.getCountRateList(slug));
-        model.addAttribute("bookReviewList", bookReviewService.getBookReviewList(slug));
+        List<RateRangeDto> bookRateRangeList = ratingService.getBookRateRangeList(slug);
+        model.addAttribute("bookRateCreateDto", new BookRateCreateDto());
+        model.addAttribute("book", bookService.getBookUnitDtoByBookSlug(slug));
+        model.addAttribute("countRateList", bookRateRangeList);
+        model.addAttribute("rateTotalCount", bookRateRangeList.stream().mapToInt(RateRangeDto::getRateCount).sum());
         return "books/slug";
     }
 
@@ -99,16 +85,16 @@ public class BookController {
     }
 
     @PostMapping("/rateBook")
-    public String rateBook(@RequestParam("bookId") String bookId,
-                           @RequestParam("value") String value) {
-        Book book = bookService.getBookByBookId(Integer.parseInt(bookId));
-        ratingService.save(book, Integer.parseInt(value));
+    public String rateBook(@RequestBody BookRateCreateDto bookRateCreateDto) {
+        Book book = bookService.getBookByBookId(Integer.parseInt(bookRateCreateDto.getBookId()));
+        ratingService.save(book, Integer.parseInt(bookRateCreateDto.getValue()));
         return ("redirect:/books/" + book.getSlug());
     }
 
     @PostMapping("/bookReview")
-    public String reviewBook(@RequestParam("bookId") String slug, @RequestParam("text") String text) {
-        Book book = bookService.getBookBySlug(slug);
+    // TODO: 22.05.2023 только авторизованные пользователи - изменить функционал по определению пользователя
+    public String reviewBook(@RequestBody BookReviewCreateDto bookReviewCreateDto) {
+        Book book = bookService.getBookBySlug(bookReviewCreateDto.getBookSlug());
         UserEntity user = userService.getUserById(new Random().nextInt(500) + 1);
         String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         LocalDateTime formatDate = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -116,21 +102,22 @@ public class BookController {
                 book,
                 user,
                 formatDate,
-                text);
+                bookReviewCreateDto.getText());
         bookReviewService.saveBookReview(bookReviewEntity);
 
         return ("redirect:/books/" + book.getSlug());
     }
 
     @PostMapping("/rateBookReview")
-    public String bookReviewLikeOrDislike(@RequestParam("reviewid") String reviewId, @RequestParam("value") String value) {
-        BookReviewEntity bookReviewEntity = bookReviewService.getReviewById(Integer.parseInt(reviewId));
+    // TODO: 22.05.2023 проверить по ТЗ, кто может ставить лайки
+    public String bookReviewLikeOrDislike(@RequestBody ReviewRateDto reviewRateDto) {
+        BookReviewEntity bookReviewEntity = bookReviewService.getReviewById(Integer.parseInt(reviewRateDto.getReviewId()));
         UserEntity user = userService.getUserById(new Random().nextInt(500) + 1);
         BookReviewLikeEntity bookReviewLikeEntity = new BookReviewLikeEntity(
                 bookReviewEntity,
                 user,
                 LocalDateTime.now(),
-                Short.parseShort(value));
+                Short.parseShort(reviewRateDto.getValue()));
         bookReviewLikeService.saveBookReviewLikeOrDislike(bookReviewLikeEntity);
 
         return ("redirect:/books/" + bookReviewEntity.getBook().getSlug());

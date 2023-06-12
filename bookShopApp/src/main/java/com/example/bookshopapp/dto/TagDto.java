@@ -3,12 +3,11 @@ package com.example.bookshopapp.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
 
-@AllArgsConstructor
-@Getter
-@Setter
+@Value
 public class TagDto {
-    private Integer id;
-    private String description;
-    private String size;
+    Integer id;
+    String description;
+
 }

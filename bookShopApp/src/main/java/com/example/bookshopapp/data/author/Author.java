@@ -1,6 +1,7 @@
 package com.example.bookshopapp.data.author;
 
 import com.example.bookshopapp.data.book.Book;
+import com.example.bookshopapp.data.book.links.Book2AuthorEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
@@ -9,6 +10,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -25,8 +27,8 @@ public class Author {
     private String description;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "authorSet", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Book> bookSet;
+    @OneToMany(mappedBy = "author")
+    private Set<Book2AuthorEntity> book2AuthorEntitySet = new HashSet<>();
 
 }
 

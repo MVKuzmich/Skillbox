@@ -1,9 +1,11 @@
 package com.example.bookshopapp.controllers;
 
 import com.example.bookshopapp.data.book.Book;
+import com.example.bookshopapp.dto.BookDto;
 import com.example.bookshopapp.dto.SearchWordDto;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.dto.BooksPageDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -20,29 +22,17 @@ import java.util.List;
 import java.util.Locale;
 
 @Controller
-public class RecentController {
+@RequiredArgsConstructor
+public class RecentController extends BaseController{
 
     private final BookService bookService;
-    @Autowired
-    public RecentController(BookService bookService) {
-        this.bookService = bookService;
-    }
 
     @ModelAttribute("recentBooks")
-    public List<Book> recentBooks(){
+    public List<BookDto> recentBooks(){
         LocalDate now = LocalDate.now();
-        return bookService.getPageOfRecentBooksBetweenDesc(now.minusMonths(1L), now, 0, 6).getContent();
+        return bookService.getRecentBooksBetweenDesc(now.minusMonths(1L), now, 0, 6).getContent();
     }
 
-    @ModelAttribute("searchWordDto")
-    public SearchWordDto searchWordDto() {
-        return new SearchWordDto();
-    }
-
-    @ModelAttribute("searchResults")
-    public List<Book> searchResults() {
-        return new ArrayList<>();
-    }
 
     @GetMapping("/recent")
     public String recentPage() {

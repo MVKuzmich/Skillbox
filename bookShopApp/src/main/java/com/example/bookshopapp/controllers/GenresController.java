@@ -6,6 +6,7 @@ import com.example.bookshopapp.dto.GenreDto;
 import com.example.bookshopapp.dto.SearchWordDto;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.GenreService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,33 +16,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-public class GenresController {
+@RequiredArgsConstructor
+public class GenresController extends BaseController {
 
-    private GenreService genreService;
-    private BookService bookService;
+    private final GenreService genreService;
+    private final BookService bookService;
 
-    public GenresController(GenreService genreService, BookService bookService) {
-        this.genreService = genreService;
-        this.bookService = bookService;
-    }
 
-    @ModelAttribute("searchWordDto")
-    public SearchWordDto searchWordDto() {
-        return new SearchWordDto();
-    }
-
-    @ModelAttribute("searchResults")
-    public List<Book> searchResults() {
-        return new ArrayList<>();
-    }
-
-    @ModelAttribute("genres")
-    public List<GenreDto> genreDtoList() {
-        return genreService.getAllGenres();
-    }
 
     @GetMapping("/genres")
-    public String genresPage() {
+    public String genresPage(Model model) {
+        model.addAttribute("genres", genreService.getAllGenres());
         return "genres/index";
     }
 
