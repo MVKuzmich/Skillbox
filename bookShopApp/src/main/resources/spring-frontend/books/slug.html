@@ -106,7 +106,7 @@ p.error-browser
                                     </div>
                                 </button>
                             </div>
-                            <div class="ProductCard-assessment" th:object="${bookRateCreateDto}">
+                            <div sec:authorize="isAuthenticated()" class="ProductCard-assessment" th:object="${bookRateCreateDto}">
                                 <span class="ProductCard-titleProp">Оцените книгу:</span>
                                 <span class="Rating Rating_input" data-bookid="2121" th:attr="data-bookid=${book.id}" th:field="*{bookId}">
                                     <span class="Rating-stars" th:each="value : ${#numbers.sequence(1, 5)}">
@@ -193,7 +193,7 @@ p.error-browser
                         <div id="myOverlay"></div>
                     </div>
                 </div>
-                <div class="Product-comments">
+                <div class="Product-comments" >
                     <div class="Product-comments-header">
                         <h3 class="Product-comments-title">Отзывы </h3>
                         <span class="Product-comments-amount" th:text="${book.reviews.size()} + ' отзыв'">30
@@ -201,7 +201,7 @@ p.error-browser
                         </span>
                     </div>
                 </div>
-                <div class="Comments">
+                <div class="Comments" sec:authorize="isAuthenticated()">
                     <!--            вставил из slugmy.html (start), форма для отзыва-->
                     <strong class="Comments-title">Написать отзыв </strong>
                     <div class="Comments-addComment">

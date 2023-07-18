@@ -4,6 +4,7 @@ import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.dto.SearchWordDto;
 import com.example.bookshopapp.repository.BookRepository;
 import com.example.bookshopapp.service.BookService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,23 +18,10 @@ import java.util.StringJoiner;
 
 @Controller
 @RequestMapping("/books")
-public class CartController {
+@RequiredArgsConstructor
+public class CartController extends BaseController {
 
     private final BookService bookService;
-
-    public CartController(BookService bookService) {
-        this.bookService = bookService;
-    }
-
-    @ModelAttribute("searchWordDto")
-    public SearchWordDto searchWordDto() {
-        return new SearchWordDto();
-    }
-
-    @ModelAttribute("searchResults")
-    public List<Book> searchResults() {
-        return new ArrayList<>();
-    }
 
     @ModelAttribute(name = "bookCart")
     public List<Book> bookCart() {

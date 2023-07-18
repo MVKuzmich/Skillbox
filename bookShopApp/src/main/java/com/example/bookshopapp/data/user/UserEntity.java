@@ -6,6 +6,7 @@ import com.example.bookshopapp.data.book.links.Book2UserEntity;
 import com.example.bookshopapp.data.book.review.BookReviewEntity;
 import com.example.bookshopapp.data.book.review.BookReviewLikeEntity;
 import com.example.bookshopapp.data.book.review.MessageEntity;
+import com.example.bookshopapp.data.bookrate.BookRateEntity;
 import com.example.bookshopapp.data.enums.ContactType;
 import com.example.bookshopapp.data.payments.BalanceTransactionEntity;
 import lombok.Getter;
@@ -25,7 +26,7 @@ import java.util.*;
 @Table(name = "users")
 @Getter @Setter @NoArgsConstructor
 @ToString(exclude = {"book2UserEntitySet", "fileDownloadEntitySet", "balanceTransactionEntitySet",
-"userReviewSet", "messageSet", "userContactSet", "userLikeSet"})
+"userReviewSet", "messageSet", "userContactSet", "userLikeSet", "bookRates"})
 public class UserEntity {
 
     @Id
@@ -64,6 +65,9 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<BookReviewLikeEntity> userLikeSet;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<BookRateEntity> bookRates;
 
     public UserEntity(String hash, LocalDateTime regTime, int balance, String name) {
         this.hash = hash;

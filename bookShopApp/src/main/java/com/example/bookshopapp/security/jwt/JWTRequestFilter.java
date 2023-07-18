@@ -2,8 +2,11 @@ package com.example.bookshopapp.security.jwt;
 
 
 import com.example.bookshopapp.data.user.UserEntity;
+import com.example.bookshopapp.errors.BlackListTokenException;
 import com.example.bookshopapp.repository.UserRepository;
 import com.example.bookshopapp.security.BookShopUserDetailsService;
+import com.example.bookshopapp.security.JwtRepository;
+import com.example.bookshopapp.security.JwtToken;
 import com.example.bookshopapp.security.SecurityUser;
 import com.example.bookshopapp.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -24,6 +27,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -31,6 +35,8 @@ public class JWTRequestFilter extends OncePerRequestFilter {
 
     private final BookShopUserDetailsService userDetailsService;
     private final JWTUtil jwtUtil;
+
+    private final JwtRepository jwtRepository;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
 
@@ -45,8 +51,13 @@ public class JWTRequestFilter extends OncePerRequestFilter {
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals("token")) {
                         token = cookie.getValue();
+                        Optional<JwtToken> tokenOptional = jwtRepository.findTokenByTokenValue(token);
+                        if (tokenOptional.isPresent()) {
+                            throw new BlackListTokenException("invalid token");
+                        }
                         username = jwtUtil.extractUsername(token);
                     }
+
 
                     if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                         SecurityUser userDetails =
@@ -63,10 +74,7 @@ public class JWTRequestFilter extends OncePerRequestFilter {
                 }
             }
             filterChain.doFilter(httpServletRequest, httpServletResponse);
-        } catch (ExpiredJwtException ex) {
-
-        }
-        catch(JwtException ex) {
+        } catch (JwtException ex) {
             handlerExceptionResolver.resolveException(httpServletRequest, httpServletResponse, null, ex);
         }
 

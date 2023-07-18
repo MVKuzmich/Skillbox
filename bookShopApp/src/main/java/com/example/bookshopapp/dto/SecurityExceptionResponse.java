@@ -1,12 +1,11 @@
 package com.example.bookshopapp.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
 
-@Getter
-@Setter
-public class UserContactConfirmationResponse {
+@Value
+public class SecurityExceptionResponse {
 
     private String result;
 }

@@ -117,7 +117,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
             "round(avg(br.value)) as rating, " +
             "b.description as description, b.price as price, b.price * (1 - b.discount) as discountPrice " +
             "from books b " +
-            "join book_rates br on b.id = br.book_id " +
+            "left join book_rates br on b.id = br.book_id " +
             "where b.slug = :bookSlug " +
             "group by b.id, b.slug, b.image, b.title",
             nativeQuery = true)

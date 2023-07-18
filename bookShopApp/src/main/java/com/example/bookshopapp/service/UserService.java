@@ -3,6 +3,7 @@ package com.example.bookshopapp.service;
 import com.example.bookshopapp.data.enums.ContactType;
 import com.example.bookshopapp.data.user.UserContactEntity;
 import com.example.bookshopapp.data.user.UserEntity;
+import com.example.bookshopapp.dto.BookDto;
 import com.example.bookshopapp.repository.UserContactRepository;
 import com.example.bookshopapp.repository.UserRepository;
 import com.example.bookshopapp.dto.UserContactConfirmationPayload;
@@ -22,11 +23,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -85,8 +89,13 @@ public class UserService {
     }
 
     public UserEntity getCurrentUser() {
-        return (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getClass().isAssignableFrom(OAuth2AuthenticationToken.class)) {
+            DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
+            email = (String)oAuth2User.getAttributes().get("email");
+        }
+        return (email == null) ? (UserEntity)authentication.getPrincipal() : userRepository.findUserByEmail(email);
     }
-
 
 }

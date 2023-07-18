@@ -26,6 +26,8 @@
     <include file="db/changelog/changeset/insert-data-book_review_like.xml"/>
     <include file="db/changelog/changeset/insert-data-user_contact.xml"/>
     <include file="db/changelog/changeset/insert-data-book_file_type.xml"/>
+    <include file="db/changelog/changeset/create-table-jwt_tokens.xml"/>
+    <include file="db/changelog/changeset/book_rates_add_column.xml"/>
 
 
 

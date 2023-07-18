@@ -1,6 +1,9 @@
 package com.example.bookshopapp.errors;
 
+import com.example.bookshopapp.dto.BookReviewErrorResponse;
+import com.example.bookshopapp.dto.SecurityExceptionResponse;
 import com.example.bookshopapp.dto.UserContactConfirmationResponse;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,21 +31,41 @@ public class GlobalExceptionHandlerController {
 
     @ExceptionHandler({AuthenticationException.class})
     @ResponseBody
-    public ResponseEntity<UserContactConfirmationResponse> handleAuthenticationException(AuthenticationException ex) {
-
-        UserContactConfirmationResponse response = new UserContactConfirmationResponse();
-        response.setResult("Username or password does not exist");
+    public ResponseEntity<SecurityExceptionResponse> handleAuthenticationException(AuthenticationException ex) {
+        SecurityExceptionResponse response = new SecurityExceptionResponse("Username or password does not exist");
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
     @ExceptionHandler({JwtException.class})
     @ResponseBody
-    public ResponseEntity<UserContactConfirmationResponse> handleJwtException(JwtException ex, HttpServletRequest request) {
-
-        UserContactConfirmationResponse response = new UserContactConfirmationResponse();
-        response.setResult("Token can not be trust");
+    public ResponseEntity<SecurityExceptionResponse> handleJwtException(JwtException ex, HttpServletRequest request) {
+        SecurityExceptionResponse response = new SecurityExceptionResponse("Token can not be trust");
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler({ExpiredJwtException.class})
+    @ResponseBody
+    public ResponseEntity<SecurityExceptionResponse> handleExpiredJwtException(ExpiredJwtException ex, HttpServletRequest request) {
+        SecurityExceptionResponse response = new SecurityExceptionResponse("expired token");
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler({BlackListTokenException.class})
+    @ResponseBody
+    public ResponseEntity<SecurityExceptionResponse> handleBlackListTokenException(BlackListTokenException ex, HttpServletRequest request) {
+        SecurityExceptionResponse response = new SecurityExceptionResponse("blacklist token");
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+    @ExceptionHandler({BookReviewMinLengthException.class})
+    @ResponseBody
+    public ResponseEntity<BookReviewErrorResponse> handleBookReviewMinLengthException(BookReviewMinLengthException ex, HttpServletRequest request) {
+
+        BookReviewErrorResponse response = new BookReviewErrorResponse(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

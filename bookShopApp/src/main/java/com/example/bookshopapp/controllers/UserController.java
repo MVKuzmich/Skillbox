@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.security.Principal;
 
 @Controller
 @RequiredArgsConstructor
@@ -57,26 +58,27 @@ public class UserController extends BaseController {
     }
 
 
-    @PostMapping("/login")
-    @ResponseBody
-    public UserContactConfirmationResponse login(@RequestBody UserContactConfirmationPayload payload) {
-        return userService.login(payload);
-    }
+//    @PostMapping("/login")
+//    @ResponseBody
+//    public UserContactConfirmationResponse login(@RequestBody UserContactConfirmationPayload payload) {
+//        return userService.login(payload);
+//    }
 
 
     //метод при работе с JWT
-//    @PostMapping("/login")
-//    @ResponseBody
-//    public UserContactConfirmationResponse handleLogin(@RequestBody UserContactConfirmationPayload payload,
-//                                                       HttpServletResponse httpServletResponse) {
-//        UserContactConfirmationResponse loginResponse = userService.jwtLogin(payload);
-//        Cookie cookie = new Cookie("token", loginResponse.getResult());
-//        httpServletResponse.addCookie(cookie);
-//        return loginResponse;
-//    }
+    @PostMapping("/login")
+    @ResponseBody
+    public UserContactConfirmationResponse handleLogin(@RequestBody UserContactConfirmationPayload payload,
+                                                       HttpServletResponse httpServletResponse) {
+        UserContactConfirmationResponse loginResponse = userService.jwtLogin(payload);
+        Cookie cookie = new Cookie("token", loginResponse.getResult());
+        httpServletResponse.addCookie(cookie);
+        return loginResponse;
+    }
 
     @GetMapping("/my")
     public String handleMy() {
+
         return "my";
     }
 

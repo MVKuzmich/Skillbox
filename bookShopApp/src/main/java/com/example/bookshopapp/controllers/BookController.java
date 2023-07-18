@@ -5,20 +5,17 @@ import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.data.book.review.BookReviewEntity;
 import com.example.bookshopapp.data.book.review.BookReviewLikeEntity;
 import com.example.bookshopapp.data.user.UserEntity;
-import com.example.bookshopapp.dto.BookRateCreateDto;
-import com.example.bookshopapp.dto.BookReviewCreateDto;
-import com.example.bookshopapp.dto.RateRangeDto;
-import com.example.bookshopapp.dto.ReviewRateDto;
+import com.example.bookshopapp.dto.*;
+import com.example.bookshopapp.errors.BookReviewMinLengthException;
 import com.example.bookshopapp.service.*;
-import com.sun.xml.bind.v2.TODO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +26,6 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Random;
 
 @Controller
 @RequestMapping("/books")
@@ -44,6 +40,9 @@ public class BookController extends BaseController {
 
     private final UserService userService;
     private final BookReviewLikeService bookReviewLikeService;
+
+    @Value("${book.review.min-length}")
+    private Integer bookReviewMinLength;
 
 
     @GetMapping("/{slug}")
@@ -85,19 +84,29 @@ public class BookController extends BaseController {
     }
 
     @PostMapping("/rateBook")
-    public String rateBook(@RequestBody BookRateCreateDto bookRateCreateDto) {
+    @PreAuthorize("hasRole('USER')")
+    @ResponseBody
+    public BookRateResponse rateBook(@RequestBody BookRateCreateDto bookRateCreateDto) {
         Book book = bookService.getBookByBookId(Integer.parseInt(bookRateCreateDto.getBookId()));
-        ratingService.save(book, Integer.parseInt(bookRateCreateDto.getValue()));
-        return ("redirect:/books/" + book.getSlug());
+        boolean result = ratingService.handleBookRate(
+                book,
+                userService.getCurrentUser(),
+                Integer.parseInt(bookRateCreateDto.getValue()));
+
+        return new BookRateResponse(result ? "true" : "false");
     }
 
     @PostMapping("/bookReview")
-    // TODO: 22.05.2023 только авторизованные пользователи - изменить функционал по определению пользователя
-    public String reviewBook(@RequestBody BookReviewCreateDto bookReviewCreateDto) {
+    @PreAuthorize("hasRole('USER')")
+    public BookReviewResponse reviewBook(@RequestBody BookReviewCreateDto bookReviewCreateDto) {
+        if(bookReviewCreateDto.getText().length() < bookReviewMinLength) {
+            throw new BookReviewMinLengthException("Отзыв слишком короткий. Напишите, пожалуйста, более развёрнутый отзыв");
+        }
         Book book = bookService.getBookBySlug(bookReviewCreateDto.getBookSlug());
-        UserEntity user = userService.getUserById(new Random().nextInt(500) + 1);
+        UserEntity user = userService.getCurrentUser();
         String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         LocalDateTime formatDate = LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
         BookReviewEntity bookReviewEntity = new BookReviewEntity(
                 book,
                 user,
@@ -105,22 +114,18 @@ public class BookController extends BaseController {
                 bookReviewCreateDto.getText());
         bookReviewService.saveBookReview(bookReviewEntity);
 
-        return ("redirect:/books/" + book.getSlug());
+        return new BookReviewResponse("true");
     }
 
     @PostMapping("/rateBookReview")
-    // TODO: 22.05.2023 проверить по ТЗ, кто может ставить лайки
-    public String bookReviewLikeOrDislike(@RequestBody ReviewRateDto reviewRateDto) {
+    @PreAuthorize("hasRole('USER')")
+    @ResponseBody
+    public BookReviewLikeResponse bookReviewLikeOrDislike(@RequestBody ReviewRateDto reviewRateDto) {
         BookReviewEntity bookReviewEntity = bookReviewService.getReviewById(Integer.parseInt(reviewRateDto.getReviewId()));
-        UserEntity user = userService.getUserById(new Random().nextInt(500) + 1);
-        BookReviewLikeEntity bookReviewLikeEntity = new BookReviewLikeEntity(
-                bookReviewEntity,
-                user,
-                LocalDateTime.now(),
-                Short.parseShort(reviewRateDto.getValue()));
-        bookReviewLikeService.saveBookReviewLikeOrDislike(bookReviewLikeEntity);
+        UserEntity user = userService.getCurrentUser();
 
-        return ("redirect:/books/" + bookReviewEntity.getBook().getSlug());
+        boolean result = bookReviewLikeService.handleBookReviewLikeOrDislike(bookReviewEntity, user, Short.parseShort(reviewRateDto.getValue()));
+
+        return new BookReviewLikeResponse(result);
     }
-
 }
