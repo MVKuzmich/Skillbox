@@ -36,7 +36,7 @@ public class Book {
     private LocalDate pubDate;
 
     @Column(name = "is_bestseller", columnDefinition = "smallint")
-    private int isBestseller;
+    private Float isBestseller;
     private String slug;
     private String title;
     private String image;

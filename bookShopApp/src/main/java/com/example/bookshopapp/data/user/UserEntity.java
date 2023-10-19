@@ -1,6 +1,5 @@
 package com.example.bookshopapp.data.user;
 
-import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.data.book.file.FileDownloadEntity;
 import com.example.bookshopapp.data.book.links.Book2UserEntity;
 import com.example.bookshopapp.data.book.review.BookReviewEntity;
@@ -9,24 +8,20 @@ import com.example.bookshopapp.data.book.review.MessageEntity;
 import com.example.bookshopapp.data.bookrate.BookRateEntity;
 import com.example.bookshopapp.data.enums.ContactType;
 import com.example.bookshopapp.data.payments.BalanceTransactionEntity;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
 @Getter @Setter @NoArgsConstructor
 @ToString(exclude = {"book2UserEntitySet", "fileDownloadEntitySet", "balanceTransactionEntitySet",
 "userReviewSet", "messageSet", "userContactSet", "userLikeSet", "bookRates"})
+@EqualsAndHashCode(of = "id")
 public class UserEntity {
 
     @Id

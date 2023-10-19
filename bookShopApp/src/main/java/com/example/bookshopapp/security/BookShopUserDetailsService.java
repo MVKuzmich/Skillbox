@@ -19,7 +19,7 @@ public class BookShopUserDetailsService extends DefaultOAuth2UserService impleme
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepository.findUserByEmail(email);
         if (userEntity == null) {
-            throw new UsernameNotFoundException("user not found doh!");
+            throw new UsernameNotFoundException("Username or password does not exist");
         }
         return new SecurityUser(userEntity);
     }

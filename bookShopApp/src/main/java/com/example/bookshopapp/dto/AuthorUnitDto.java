@@ -1,12 +1,14 @@
 package com.example.bookshopapp.dto;
 
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 
 import java.util.List;
 
 
-@Value
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Builder
 public class AuthorUnitDto {
 

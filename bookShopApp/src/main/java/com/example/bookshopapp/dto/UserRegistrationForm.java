@@ -1,10 +1,14 @@
 package com.example.bookshopapp.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldNameConstants;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldNameConstants
 public class UserRegistrationForm {
 
     private String name;

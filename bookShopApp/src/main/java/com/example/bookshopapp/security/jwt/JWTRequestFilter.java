@@ -1,21 +1,17 @@
 package com.example.bookshopapp.security.jwt;
 
 
+import com.example.bookshopapp.data.enums.ContactType;
+import com.example.bookshopapp.data.user.UserContactEntity;
 import com.example.bookshopapp.data.user.UserEntity;
 import com.example.bookshopapp.errors.BlackListTokenException;
 import com.example.bookshopapp.repository.UserRepository;
 import com.example.bookshopapp.security.BookShopUserDetailsService;
-import com.example.bookshopapp.security.JwtRepository;
-import com.example.bookshopapp.security.JwtToken;
 import com.example.bookshopapp.security.SecurityUser;
-import com.example.bookshopapp.service.UserService;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -27,7 +23,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.http.HttpHeaders;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -37,6 +38,7 @@ public class JWTRequestFilter extends OncePerRequestFilter {
     private final JWTUtil jwtUtil;
 
     private final JwtRepository jwtRepository;
+    private final UserRepository userRepository;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
 
@@ -45,30 +47,31 @@ public class JWTRequestFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException, RuntimeException {
         String token = null;
         String username = null;
-        Cookie[] cookies = httpServletRequest.getCookies();
+        Optional<Cookie[]> cookies = Optional.ofNullable(httpServletRequest.getCookies());
         try {
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals("token")) {
-                        token = cookie.getValue();
-                        Optional<JwtToken> tokenOptional = jwtRepository.findTokenByTokenValue(token);
-                        if (tokenOptional.isPresent()) {
-                            throw new BlackListTokenException("invalid token");
-                        }
+            if (cookies.isPresent()) {
+                token = Arrays.stream(cookies.get())
+                        .filter(cookieName -> cookieName.getName().equals("token"))
+                        .map(Cookie::getValue)
+                        .findAny()
+                        .orElse(null);
+
+                if (token != null) {
+                    if (jwtRepository.findTokenByTokenValue(token).isPresent()) {
+                        throw new BlackListTokenException("invalid token");
+                    } else {
                         username = jwtUtil.extractUsername(token);
-                    }
+                        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                            SecurityUser userDetails =
+                                    (SecurityUser) userDetailsService.loadUserByUsername(username);
+                            if (jwtUtil.validateToken(token, userDetails)) {
+                                UsernamePasswordAuthenticationToken authenticationToken =
+                                        new UsernamePasswordAuthenticationToken(
+                                                userDetails, null, userDetails.getAuthorities());
 
-
-                    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                        SecurityUser userDetails =
-                                (SecurityUser) userDetailsService.loadUserByUsername(username);
-                        if (jwtUtil.validateToken(token, userDetails)) {
-                            UsernamePasswordAuthenticationToken authenticationToken =
-                                    new UsernamePasswordAuthenticationToken(
-                                            userDetails, null, userDetails.getAuthorities());
-
-                            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
-                            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+                                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                            }
                         }
                     }
                 }

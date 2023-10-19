@@ -7,7 +7,7 @@ public interface BookUnitModelDto {
     String getImage();
     String getTitle();
     Integer getDiscount();
-    Integer getBestseller();
+    Float getBestseller();
     Integer getRating();
     String getDescription();
     Integer getPrice();

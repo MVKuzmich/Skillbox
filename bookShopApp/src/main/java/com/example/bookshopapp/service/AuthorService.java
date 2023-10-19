@@ -28,8 +28,8 @@ public class AuthorService {
         return authors.stream().collect(Collectors.groupingBy((AuthorDto a) -> a.getName().substring(0,1)));
     }
 
-    public AuthorUnitDto getAuthorUnitDtoBySlug(String slug, Integer offset, Integer limit) {
-        return authorRepository.findAuthorBySlug(slug)
+    public AuthorUnitDto getAuthorUnitDtoBySlug(String authorSlug, Integer offset, Integer limit) {
+        return authorRepository.findAuthorBySlug(authorSlug)
                 .map(author -> authorMapper.toAuthorUnitDto(author, getBooksByAuthorSlug(author.getSlug(), offset, limit)))
                 .orElseThrow();
     }

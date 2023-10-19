@@ -2,21 +2,25 @@ package com.example.bookshopapp.repository;
 
 
 import com.example.bookshopapp.data.book.Book;
+import com.example.bookshopapp.data.tag.TagEntity;
+import com.example.bookshopapp.data.user.UserEntity;
 import com.example.bookshopapp.dto.AuthorDto;
-import com.example.bookshopapp.dto.BookFileDto;
 import com.example.bookshopapp.dto.BookModelDto;
 import com.example.bookshopapp.dto.BookUnitModelDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface BookRepository extends JpaRepository<Book, Integer> {
+public interface BookRepository extends
+        JpaRepository<Book, Integer>,
+        BookFilterRepository,
+        QuerydslPredicateExecutor<Book> {
 
     Page<Book> findBookByTitleContaining(String bookTitle, Pageable nextPage);
 
@@ -40,13 +44,15 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
     List<Book> findBooksByPriceOldIs(Integer price);
 
-    @Query("from Book where isBestseller=1")
+    @Query("from Book where isBestseller = 1")
     List<Book> getBestsellers();
 
     @Query(value = "SELECT * FROM books WHERE discount = (SELECT MAX(discount) FROM books)", nativeQuery = true)
     List<Book> getBooksWithMaxDiscount();
 
     List<Book> findBooksBySlugIn(String[] cookieSlugs);
+
+    Page<Book> findBooksBySlugIn(List<String> cookieSlugs, Pageable pageable);
 
     @Query("select new com.example.bookshopapp.dto.AuthorDto(a.slug, a.name) " +
             "from Book b " +
@@ -56,37 +62,34 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
             "order by b2a.sortIndex")
     List<AuthorDto> findAuthorsByBookId(Integer bookId);
 
-    @Query("select b.id as id, b.slug as slug, b.image as image, b.title as title, " +
-            "b.price * 100 as discount, " +
-            "b.isBestseller as bestseller, " +
-            "b.description, b.priceOld, b.priceOld * (1 - b.price) as discountPrice " +
+    @Query("select new com.example.bookshopapp.dto.BookModelDto(b.id, b.slug, b.image, b.title, " +
+            "b.price * 100, " +
+            "b.isBestseller, " +
+            "b.description, b.priceOld, b.priceOld * (1 - b.price)) " +
             "from Book b")
     Page<BookModelDto> findAllRecommendedBooks(Pageable pageable);
 
-    @Query("select b.id as id, b.slug as slug, b.image as image, b.title as title, " +
-            "b.price * 100 as discount, " +
-            "b.isBestseller as bestseller, " +
-            "b.description, b.priceOld, b.priceOld * (1 - b.price) as discountPrice " +
+
+    @Query("select new com.example.bookshopapp.dto.BookModelDto (b.id, b.slug, b.image, b.title, " +
+            "b.price * 100, " +
+            "b.isBestseller, " +
+            "b.description, b.priceOld, b.priceOld * (1 - b.price)) " +
             "from Book b " +
             "where b.pubDate > :fromDate and b.pubDate < :endDate " +
             "order by b.pubDate desc")
     Page<BookModelDto> findAllRecentBooksBetween(LocalDate fromDate, LocalDate endDate, Pageable pageable);
 
-    @Query("select b.id as id, b.slug as slug, b.image as image, b.title as title, " +
-            "b.price * 100 as discount, " +
-            "b.isBestseller as bestseller, " +
-            "b.description, b.priceOld, b.priceOld * (1 - b.price) as discountPrice " +
+    @Query("select new com.example.bookshopapp.dto.BookModelDto (b.id, b.slug, b.image, b.title, " +
+            "b.price * 100, " +
+            "b.isBestseller, " +
+            "b.description, b.priceOld, b.priceOld * (1 - b.price)) " +
             "from Book b " +
             "order by b.pubDate desc")
     Page<BookModelDto> findAllRecentBooks(Pageable pageable);
 
-    @Query(value = "select res.id,  res.slug, res.bestseller, res.image, res.title, res.discount, " +
-            "res.description, res.price, res.discountPrice " +
+    @Query(value = "select res.* " +
             "from (" +
-            "select b.id, b.slug, b.image, b.title, " +
-            "b.discount * 100 as discount, " +
-            "b.is_bestseller as bestseller, " +
-            "b.description, b.price, b.price * (1 - b.discount) as discountPrice, " +
+            "select b.*, " +
             "(count(case when b2ut.code = 'PAID' then 1 else null end) + " +
             "count(case when b2ut.code = 'CART' then 1 else null end) * 0.7 + " +
             "count(case when b2ut.code = 'KEPT' then 1 else null end) * 0.4) " +
@@ -98,9 +101,8 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
             "order by popularity desc, res.title",
             nativeQuery = true,
             countQuery = "select count(*) from (" +
-                    "select b.id, b.slug, b.image, b.title, b.discount * 100 as discount, " +
-                    "b.is_bestseller as bestseller, " +
-                    "b.price, b.price * (1 - b.discount) as discountPrice, " +
+                    "select b.id, b.is_bestseller, b.slug, b.title, b.image, " +
+                    "b.description, b.price, b.discount, " +
                     "(count(case when b2ut.code = 'PAID' then 1 else null end) + " +
                     "count(case when b2ut.code = 'CART' then 1 else null end) * 0.7 + " +
                     "count(case when b2ut.code = 'KEPT' then 1 else null end) * 0.4) " +
@@ -109,42 +111,49 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
                     "join book2user as b2u on b.id = b2u.book_id " +
                     "join book2user_type b2ut on b2u.type_id = b2ut.id " +
                     "group by b.id, b.slug, b.image, b.title) as res")
-    Page<BookModelDto> findPopularBooks(Pageable pageable);
+    Page<Book> findPopularBooks(Pageable pageable);
 
-    @Query(value = "select b.id as id, b.slug as slug, b.image as image, b.title as title, " +
-            "b.discount * 100 as discount, " +
-            "b.is_bestseller as bestseller, " +
-            "round(avg(br.value)) as rating, " +
-            "b.description as description, b.price as price, b.price * (1 - b.discount) as discountPrice " +
-            "from books b " +
-            "left join book_rates br on b.id = br.book_id " +
+    @Query("select b.id as id, b.slug as slug, b.image as image, b.title as title, " +
+            "b.price * 100 as discount, " +
+            "b.isBestseller as bestseller, " +
+            "avg(br.value) as rating, " +
+            "b.description as description, b.priceOld as price, b.priceOld * (1 - b.price) as discountPrice " +
+            "from Book b " +
+            "left join b.bookRateList br " +
             "where b.slug = :bookSlug " +
-            "group by b.id, b.slug, b.image, b.title",
-            nativeQuery = true)
+            "group by b.id, b.slug, b.image, b.title")
     Optional<BookUnitModelDto> findBookUnitBySlug(String bookSlug);
 
 
-    @Query(nativeQuery = true,
-            value = "select b.id, b.slug, b.image, b.title, " +
-                    "b.discount * 100 as discount, " +
-                    "cast( " +
-                    "CASE " +
-                    "WHEN b.is_bestseller = 1 THEN 'true' " +
-                    "ELSE 'false' " +
-                    "END as boolean) as bestseller, " +
-                    "b.description, " +
-                    "b.price, b.price * (1 - b.discount) as discountPrice " +
-                    "from books b " +
-                    "join book2tag b2t on b.id = b2t.book_id " +
-                    "join tags t on b2t.tag_id = t.id " +
-                    "where t.id = :tagId order by b.pub_date desc",
-            countQuery = "select count(*) from books b " +
-                    "join book2tag b2t on b.id = b2t.book_id " +
-                    "join tags t on b2t.tag_id = t.id " +
-                    "where t.id = :tagId")
-    Page<BookModelDto> findBooksByTagId(Integer tagId, Pageable pageable);
+    @Query("select new com.example.bookshopapp.dto.BookModelDto " +
+            "(b.id, b.slug, b.image, b.title, " +
+            "b.price * 100, " +
+            "b.isBestseller, " +
+            "b.description, " +
+            "b.priceOld, b.priceOld * (1 - b.price)) " +
+            "from Book b " +
+            "join b.book2TagEntitySet b2t " +
+            "join b2t.tag t " +
+            "where t = :tag " +
+            "order by b.pubDate desc")
+    Page<BookModelDto> findBooksByTag(TagEntity tag, Pageable pageable);
 
 
+    @Query("select b from Book b " +
+            "join b.book2UserEntitySet b2u " +
+            "join b2u.user u " +
+            "join b2u.type t " +
+            "where t.code in ('KEPT', 'CART', 'PAID') and u = :user")
+    List<Book>findBooksByUserChoice(UserEntity user);
+
+    @Query("select b from Book b " +
+            "left join b.bookRateList br " +
+            "group by b.id " +
+            "order by avg(br.value) desc, b.pubDate desc")
+    Page<Book> findBooksWithHighRating(Pageable pageable);
+
+
+    Book findBookById(Integer bookId);
 }
 
 

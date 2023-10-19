@@ -2000,3 +2000,4 @@ insert into user_contact (user_id, current_contact_type, approved, code, code_tr
 insert into user_contact (user_id, current_contact_type, approved, code, code_trials, code_time, contact) values (1000, 'PHONE', 1, '111', 3, '2021-08-31 00:00:00', '+62 480 469 0086');
 insert into user_contact (user_id, current_contact_type, approved, code, code_trials, code_time, contact) values (1001, 'PHONE', 1, '111', 3, '2023-01-01 00:00:00', '+375447565635');
 insert into user_contact (user_id, current_contact_type, approved, code, code_trials, code_time, contact) values (1001, 'EMAIL', 1, '111', 3, '2023-01-01 00:00:00', 'kmv85@mail.ru');
+insert into user_contact (user_id, current_contact_type, approved, code, code_trials, code_time, contact) values (1001, 'EMAIL', 1, '111', 3, '2023-08-21 20:07:31.042298', 'derek@gmail.ru');

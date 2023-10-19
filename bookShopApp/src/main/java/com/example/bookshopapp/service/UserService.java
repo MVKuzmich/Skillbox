@@ -4,6 +4,7 @@ import com.example.bookshopapp.data.enums.ContactType;
 import com.example.bookshopapp.data.user.UserContactEntity;
 import com.example.bookshopapp.data.user.UserEntity;
 import com.example.bookshopapp.dto.BookDto;
+import com.example.bookshopapp.errors.UserRegistrationFailureException;
 import com.example.bookshopapp.repository.UserContactRepository;
 import com.example.bookshopapp.repository.UserRepository;
 import com.example.bookshopapp.dto.UserContactConfirmationPayload;
@@ -45,14 +46,12 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final BookShopUserDetailsService userDetailsService;
 
-    public UserEntity getUserById(Integer id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        // TODO: 28.05.2023 method is used only for temporal logic -> refactor when user defining will be realized
-    }
 
     @Transactional
-    public void registerNewUser(UserRegistrationForm userRegistrationForm) {
-        if (userRepository.findUserByEmail(userRegistrationForm.getEmail()) == null) {
+    public void registerNewUser(UserRegistrationForm userRegistrationForm) throws UserRegistrationFailureException {
+        if (userRepository.findUserByEmail(userRegistrationForm.getEmail()) != null) {
+            throw new UserRegistrationFailureException("such an user exist! Please, log in!");
+        } else {
             UserEntity user = userRepository.save(new UserEntity(
                     passwordEncoder.encode(userRegistrationForm.getPassword()),
                     LocalDateTime.now(),
@@ -64,7 +63,6 @@ public class UserService {
             contactRepository.save(new UserContactEntity(
                     user, ContactType.PHONE, (short) 1, "111", 3, LocalDateTime.now(), userRegistrationForm.getPhone()));
         }
-        // TODO: 01.06.2023 Обработка случая, когда при регистрации вводятся данные существующего пользователя 
     }
 
     public UserContactConfirmationResponse login(UserContactConfirmationPayload payload) {
@@ -95,7 +93,6 @@ public class UserService {
             DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
             email = (String)oAuth2User.getAttributes().get("email");
         }
-        return (email == null) ? (UserEntity)authentication.getPrincipal() : userRepository.findUserByEmail(email);
+        return (email == null) ? ((SecurityUser)authentication.getPrincipal()).getUserEntity() : userRepository.findUserByEmail(email);
     }
-
 }

@@ -1,8 +1,8 @@
 package com.example.bookshopapp.controllers;
 
 import com.example.bookshopapp.data.book.Book;
-import com.example.bookshopapp.dto.SearchWordDto;
 import com.example.bookshopapp.service.BookService;
+import com.example.bookshopapp.util.CookieHandleUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,15 +11,16 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.StringJoiner;
 
 @Controller
 @RequestMapping("/books")
 @RequiredArgsConstructor
 public class PostponedController extends BaseController{
 
+    public static final String COOKIE_PATH = "/";
+    public static final String POSTPONED_BOOKS_COOKIE_NAME = "postponedContents";
+    public static final String IS_POSTPONED_EMPTY = "isPostponedEmpty";
     private final BookService bookService;
 
     @ModelAttribute(name = "postponedBooks")
@@ -31,11 +32,10 @@ public class PostponedController extends BaseController{
     public String handleCartRequest(@CookieValue(value = "postponedContents", required = false) String postponedContents,
                                     Model model) {
         if (postponedContents == null || postponedContents.equals("")) {
-            model.addAttribute("isPostponedEmpty", true);
+            model.addAttribute(IS_POSTPONED_EMPTY, true);
         } else {
-            model.addAttribute("isPostponedEmpty", false);
-            postponedContents = postponedContents.startsWith("/") ? postponedContents.substring(1) : postponedContents;
-            postponedContents = postponedContents.endsWith("/") ? postponedContents.substring(0, postponedContents.length() - 1) : postponedContents;
+            model.addAttribute(IS_POSTPONED_EMPTY, false);
+            postponedContents = CookieHandleUtil.checkIfFirstOrEndSlashExist(postponedContents);
             String[] cookieSlugs = postponedContents.split("/");
             List<Book> booksFromCookieSlugs = bookService.getBooksBySlugIn(cookieSlugs);
             model.addAttribute("postponedBooks", booksFromCookieSlugs);
@@ -49,38 +49,27 @@ public class PostponedController extends BaseController{
             "postponedContents", required = false) String postponedContents, HttpServletResponse response, Model model) {
 
         if (postponedContents != null && !postponedContents.equals("")) {
-            ArrayList<String> cookieBooks = new ArrayList<>(Arrays.asList(postponedContents.split("/")));
-            cookieBooks.remove(slug);
-            Cookie cookie = new Cookie("postponedContents", String.join("/", cookieBooks));
-            cookie.setPath("/books");
+            Cookie cookie = CookieHandleUtil.removeElementFromCookieValue(slug, postponedContents, POSTPONED_BOOKS_COOKIE_NAME);
+            cookie.setPath(COOKIE_PATH);
             response.addCookie(cookie);
-            model.addAttribute("isPostponedEmpty", false);
+            model.addAttribute(IS_POSTPONED_EMPTY, false);
         } else {
-            model.addAttribute("isPostponedEmpty", true);
+            model.addAttribute(IS_POSTPONED_EMPTY, true);
         }
 
         return "redirect:/books/postponed";
     }
 
+
     @PostMapping("/changeBookStatus/postponed/{slug}")
-    public String handleChangeBookStatus(@PathVariable("slug") String slug, @CookieValue(name = "postponedContents",
+    public String handleAddBookToPostponed(@PathVariable("slug") String bookSlug, @CookieValue(name = "postponedContents",
             required = false) String postponedContents, HttpServletResponse response, Model model) {
+        Cookie cookie = CookieHandleUtil.addElementToCookieValue(bookSlug, postponedContents, POSTPONED_BOOKS_COOKIE_NAME);
+        cookie.setPath(COOKIE_PATH); //для доступности cookie на всех эндпоинтах books/
+        response.addCookie(cookie);
+        model.addAttribute(IS_POSTPONED_EMPTY, false);
 
-        if (postponedContents == null || postponedContents.equals("")) {
-            Cookie cookie = new Cookie("postponedContents", slug);
-            cookie.setPath("/books"); //для доступности cookie на всех эндпоинтах books/
-            response.addCookie(cookie);
-            model.addAttribute("isPostponedEmpty", false);
-        } else if (!postponedContents.contains(slug)) {
-            StringJoiner stringJoiner = new StringJoiner("/");
-            stringJoiner.add(postponedContents).add(slug);
-            Cookie cookie = new Cookie("postponedContents", stringJoiner.toString());
-            cookie.setPath("/books");
-            response.addCookie(cookie);
-            model.addAttribute("isPostponedEmpty", false);
-        }
-
-        return "redirect:/books/" + slug;
+        return "redirect:/books/" + bookSlug;
     }
 
 }

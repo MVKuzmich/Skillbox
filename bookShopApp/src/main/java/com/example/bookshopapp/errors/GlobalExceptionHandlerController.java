@@ -8,6 +8,7 @@ import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 @Slf4j
 public class GlobalExceptionHandlerController {
 
-
     @ExceptionHandler(EmptySearchException.class)
     public String handleEmptySearchException(EmptySearchException e, RedirectAttributes redirectAttributes) {
         log.warn(e.getLocalizedMessage());
@@ -32,7 +32,7 @@ public class GlobalExceptionHandlerController {
     @ExceptionHandler({AuthenticationException.class})
     @ResponseBody
     public ResponseEntity<SecurityExceptionResponse> handleAuthenticationException(AuthenticationException ex) {
-        SecurityExceptionResponse response = new SecurityExceptionResponse("Username or password does not exist");
+        SecurityExceptionResponse response = new SecurityExceptionResponse(ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
@@ -67,5 +67,10 @@ public class GlobalExceptionHandlerController {
         BookReviewErrorResponse response = new BookReviewErrorResponse(ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+    @ExceptionHandler(UserRegistrationFailureException.class)
+    public String handleUserRegistrationFailureException(UserRegistrationFailureException e, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("registrationFailure", e.getMessage());
+        return "redirect:/signin";
     }
 }

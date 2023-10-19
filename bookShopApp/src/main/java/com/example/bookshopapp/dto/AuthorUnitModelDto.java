@@ -1,8 +1,12 @@
 package com.example.bookshopapp.dto;
 
-import lombok.Value;
+import lombok.*;
 
-@Value
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class AuthorUnitModelDto {
     Integer id;
     String photo;

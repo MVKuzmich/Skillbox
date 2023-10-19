@@ -5,6 +5,10 @@ import com.example.bookshopapp.dto.UserContactConfirmationResponse;
 import com.example.bookshopapp.dto.UserRegistrationForm;
 import com.example.bookshopapp.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
+import java.util.Collections;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class UserController extends BaseController {
 
     private final UserService userService;
@@ -58,13 +65,6 @@ public class UserController extends BaseController {
     }
 
 
-//    @PostMapping("/login")
-//    @ResponseBody
-//    public UserContactConfirmationResponse login(@RequestBody UserContactConfirmationPayload payload) {
-//        return userService.login(payload);
-//    }
-
-
     //метод при работе с JWT
     @PostMapping("/login")
     @ResponseBody
@@ -75,6 +75,7 @@ public class UserController extends BaseController {
         httpServletResponse.addCookie(cookie);
         return loginResponse;
     }
+
 
     @GetMapping("/my")
     public String handleMy() {
@@ -87,21 +88,6 @@ public class UserController extends BaseController {
         model.addAttribute("currentUser", userService.getCurrentUser());
         return "profile";
     }
-
-    //при работе БЕЗ JWT
-//    @GetMapping("/logout")
-//    public String handleLogout(HttpServletRequest request) {
-//        HttpSession session = request.getSession();
-//        SecurityContextHolder.clearContext();
-//        if (session != null) {
-//            session.invalidate();
-//        }
-//
-//        for (Cookie cookie : request.getCookies()) {
-//            cookie.setMaxAge(0);
-//        }
-//        return "redirect:/";
-//    }
 }
 
 

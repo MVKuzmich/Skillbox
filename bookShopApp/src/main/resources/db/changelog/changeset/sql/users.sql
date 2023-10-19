@@ -999,3 +999,4 @@ insert into users (hash, reg_time, balance, name) values ('35-423-1295', '2022-0
 insert into users (hash, reg_time, balance, name) values ('29-202-6747', '2020-12-20', 0, 'Marianne Kemster');
 insert into users (hash, reg_time, balance, name) values ('96-642-5731', '2022-01-10', 0, 'Dorthea Terzo');
 insert into users (hash, reg_time, balance, name) values ('97-6427-57317', '2023-01-01', 0, 'Mikhail Kuzmich');
+insert into users (hash, reg_time, balance, name) values ('{bcrypt}$2a$10$FWAmLBthqfx2iudzTy64weueCMcw/Sx4Kw89XVfod0ho3nM64qr56', '2023-08-21 20:07:30.732969', 0, 'derek');
