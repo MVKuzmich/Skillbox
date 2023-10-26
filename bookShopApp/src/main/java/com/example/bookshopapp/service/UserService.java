@@ -49,7 +49,9 @@ public class UserService {
 
     @Transactional
     public void registerNewUser(UserRegistrationForm userRegistrationForm) throws UserRegistrationFailureException {
-        if (userRepository.findUserByEmail(userRegistrationForm.getEmail()) != null) {
+        UserEntity userByEmail = userRepository.findUserByContact(userRegistrationForm.getEmail());
+        UserEntity userByPhone = userRepository.findUserByContact(userRegistrationForm.getPhone());
+        if (userByEmail != null || userByPhone != null) {
             throw new UserRegistrationFailureException("such an user exist! Please, log in!");
         } else {
             UserEntity user = userRepository.save(new UserEntity(
@@ -76,6 +78,7 @@ public class UserService {
     }
 
     public UserContactConfirmationResponse jwtLogin(UserContactConfirmationPayload payload) throws UsernameNotFoundException {
+
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(payload.getContact(),
                 payload.getCode()));
         SecurityUser userDetails =
@@ -93,6 +96,6 @@ public class UserService {
             DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
             email = (String)oAuth2User.getAttributes().get("email");
         }
-        return (email == null) ? ((SecurityUser)authentication.getPrincipal()).getUserEntity() : userRepository.findUserByEmail(email);
+        return (email == null) ? ((SecurityUser)authentication.getPrincipal()).getUserEntity() : userRepository.findUserByContact(email);
     }
 }

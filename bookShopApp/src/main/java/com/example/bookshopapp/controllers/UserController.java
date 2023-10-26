@@ -4,6 +4,9 @@ import com.example.bookshopapp.dto.UserContactConfirmationPayload;
 import com.example.bookshopapp.dto.UserContactConfirmationResponse;
 import com.example.bookshopapp.dto.UserRegistrationForm;
 import com.example.bookshopapp.service.UserService;
+import com.example.bookshopapp.sms2FA.SmsCode;
+import com.example.bookshopapp.sms2FA.SmsService;
+import com.example.bookshopapp.sms2FA.Sms_byResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 
 @Controller
@@ -25,6 +30,7 @@ import java.util.Map;
 public class UserController extends BaseController {
 
     private final UserService userService;
+    private final SmsService smsService;
 
     @GetMapping("/signin")
     public String handleSignInPage() {
@@ -39,12 +45,32 @@ public class UserController extends BaseController {
     }
 
     //заглушка для работы кнопки подтверждения
-    @PostMapping("/requestContactConfirmation")
+    @PostMapping("/registerContactConfirmation")
     @ResponseBody
-    public UserContactConfirmationResponse handleRequestContactConfirmation(@RequestBody UserContactConfirmationPayload payload) {
+    public UserContactConfirmationResponse handleRegisterContactConfirmation(@RequestBody UserContactConfirmationPayload payload) {
         UserContactConfirmationResponse response = new UserContactConfirmationResponse();
-        response.setResult("true");
-        return response;
+        if(payload.getContact().contains("@")) {
+            response.setResult("true");
+            return response; // for email
+        } else {
+            Sms_byResponse sendSmsResponse = smsService.sendSmsMessage(payload.getContact());
+            smsService.saveSmsCode(new SmsCode(smsService.formatCode(sendSmsResponse.getCode()), 60));
+            response.setResult("true");
+            return response;
+        }
+    }
+
+    @PostMapping("/loginContactConfirmation")
+    @ResponseBody
+    public UserContactConfirmationResponse handleLoginContactConfirmation(@RequestBody UserContactConfirmationPayload payload) {
+        UserContactConfirmationResponse response = new UserContactConfirmationResponse();
+        if(payload.getContact().contains("@")) {
+            response.setResult("true");
+            return response; // for email
+        } else {
+            response.setResult("true");
+            return response;
+        }
     }
 
     //заглушка для работы кнопки подтверждения
@@ -52,8 +78,16 @@ public class UserController extends BaseController {
     @ResponseBody
     public UserContactConfirmationResponse handleApproveContact(@RequestBody UserContactConfirmationPayload payload) {
         UserContactConfirmationResponse response = new UserContactConfirmationResponse();
-        response.setResult("true");
-        return response;
+        if(payload.getContact().contains("@")) {
+            response.setResult("true");
+            return response;
+        } else {
+            if(smsService.verifyCode(payload.getCode())) {
+                response.setResult("true");
+                return response;
+            }
+            return new UserContactConfirmationResponse();
+        }
     }
 
     //

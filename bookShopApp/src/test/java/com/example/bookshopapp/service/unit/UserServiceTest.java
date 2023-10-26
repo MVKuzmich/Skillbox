@@ -100,7 +100,7 @@ class UserServiceTest {
     void testRegisterNewUser_exception() {
 
         UserEntity existingUser = new UserEntity(null, null, 0, "Existing User");
-        when(userRepository.findUserByEmail(anyString())).thenReturn(existingUser);
+        when(userRepository.findUserByContact(anyString())).thenReturn(existingUser);
 
         assertThrows(UserRegistrationFailureException.class, () -> {
             userService.registerNewUser(userRegistrationForm);

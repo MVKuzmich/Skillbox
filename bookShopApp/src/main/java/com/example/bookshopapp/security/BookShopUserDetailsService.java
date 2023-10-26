@@ -16,8 +16,8 @@ public class BookShopUserDetailsService extends DefaultOAuth2UserService impleme
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserEntity userEntity = userRepository.findUserByEmail(email);
+    public UserDetails loadUserByUsername(String contact) throws UsernameNotFoundException {
+        UserEntity userEntity = userRepository.findUserByContact(contact);
         if (userEntity == null) {
             throw new UsernameNotFoundException("Username or password does not exist");
         }
