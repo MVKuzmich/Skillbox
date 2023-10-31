@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +57,18 @@ public class SmsService {
         sb.insert(3, " ");
         return sb.toString();
     }
+
+    public String generateCode() {
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 6; i++) {
+            sb.append(random.nextInt(9));
+        }
+        sb.insert(3, " ");
+    return sb.toString();
+
+    }
+
 
 
 }

@@ -22,7 +22,7 @@ public class SmsCode {
     private String codeValue;
     private LocalDateTime expireTime;
 
-    public SmsCode(String code, Integer expireIn) {
+    public SmsCode(String codeValue, Integer expireIn) {
         this.codeValue = codeValue;
         this.expireTime = LocalDateTime.now().plusSeconds(expireIn);
     }

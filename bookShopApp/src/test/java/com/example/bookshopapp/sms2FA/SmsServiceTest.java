@@ -53,4 +53,9 @@ class SmsServiceTest {
         assertThat(smsService.formatCode(code)).isEqualTo(expected);
 
     }
+
+    @Test
+    public void testGenerateCodeMethod() {
+        assertTrue(smsService.generateCode().matches("[0-9]{3}\\s[0-9]{3}"));
+    }
 }

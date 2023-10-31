@@ -3,6 +3,7 @@ package com.example.bookshopapp.controllers;
 import com.example.bookshopapp.dto.UserContactConfirmationPayload;
 import com.example.bookshopapp.dto.UserContactConfirmationResponse;
 import com.example.bookshopapp.dto.UserRegistrationForm;
+import com.example.bookshopapp.emailsender.EmailSenderService;
 import com.example.bookshopapp.service.UserService;
 import com.example.bookshopapp.sms2FA.SmsCode;
 import com.example.bookshopapp.sms2FA.SmsService;
@@ -31,6 +32,7 @@ public class UserController extends BaseController {
 
     private final UserService userService;
     private final SmsService smsService;
+    private final EmailSenderService emailSenderService;
 
     @GetMapping("/signin")
     public String handleSignInPage() {
@@ -49,12 +51,21 @@ public class UserController extends BaseController {
     @ResponseBody
     public UserContactConfirmationResponse handleRegisterContactConfirmation(@RequestBody UserContactConfirmationPayload payload) {
         UserContactConfirmationResponse response = new UserContactConfirmationResponse();
-        if(payload.getContact().contains("@")) {
+        if (payload.getContact().contains("@")) {
+            String code = emailSenderService.sendEmail(payload.getContact());
+            smsService.saveSmsCode(new SmsCode(code, 120));
             response.setResult("true");
+
             return response; // for email
         } else {
+            /*
+             TODO: 28.10.2023
+             need to check sms sending functionality - no possibility to use sms.by service
+
             Sms_byResponse sendSmsResponse = smsService.sendSmsMessage(payload.getContact());
             smsService.saveSmsCode(new SmsCode(smsService.formatCode(sendSmsResponse.getCode()), 60));
+             */
+
             response.setResult("true");
             return response;
         }
@@ -64,7 +75,7 @@ public class UserController extends BaseController {
     @ResponseBody
     public UserContactConfirmationResponse handleLoginContactConfirmation(@RequestBody UserContactConfirmationPayload payload) {
         UserContactConfirmationResponse response = new UserContactConfirmationResponse();
-        if(payload.getContact().contains("@")) {
+        if (payload.getContact().contains("@")) {
             response.setResult("true");
             return response; // for email
         } else {
@@ -78,16 +89,25 @@ public class UserController extends BaseController {
     @ResponseBody
     public UserContactConfirmationResponse handleApproveContact(@RequestBody UserContactConfirmationPayload payload) {
         UserContactConfirmationResponse response = new UserContactConfirmationResponse();
-        if(payload.getContact().contains("@")) {
-            response.setResult("true");
-            return response;
+        if (payload.getContact().contains("@")) {
+            if (smsService.verifyCode(payload.getCode())) {
+                response.setResult("true");
+            } else {
+                response.setResult("false");
+            }
         } else {
+            /*
+            if sms service will be fixed ->
+
             if(smsService.verifyCode(payload.getCode())) {
                 response.setResult("true");
                 return response;
             }
             return new UserContactConfirmationResponse();
+             */
+            response.setResult("true");
         }
+        return response;
     }
 
     //
