@@ -5,6 +5,7 @@ import com.example.bookshopapp.dto.AuthorPageBooksDto;
 import com.example.bookshopapp.service.AuthorService;
 
 import com.example.bookshopapp.service.BookService;
+import com.example.bookshopapp.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,8 +17,8 @@ public class AuthorsController extends BaseController {
 
     private final AuthorService authorService;
 
-    public AuthorsController(BookService bookService, AuthorService authorService) {
-        super(bookService);
+    public AuthorsController(BookService bookService, UserService userService, AuthorService authorService) {
+        super(bookService, userService);
         this.authorService = authorService;
     }
 

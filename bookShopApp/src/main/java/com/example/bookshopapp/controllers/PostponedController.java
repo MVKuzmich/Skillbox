@@ -2,6 +2,7 @@ package com.example.bookshopapp.controllers;
 
 import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.service.BookService;
+import com.example.bookshopapp.service.UserService;
 import com.example.bookshopapp.util.CookieHandleUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,8 +21,8 @@ public class PostponedController extends BaseController{
     public static final String POSTPONED_BOOKS_COOKIE_NAME = "postponedContents";
     public static final String IS_POSTPONED_EMPTY = "isPostponedEmpty";
 
-    protected PostponedController(BookService bookService) {
-        super(bookService);
+    protected PostponedController(BookService bookService, UserService userService) {
+        super(bookService, userService);
     }
 
     @ModelAttribute(name = "postponedBooks")
@@ -32,7 +33,7 @@ public class PostponedController extends BaseController{
     @GetMapping("/postponed")
     public String handleCartRequest(@CookieValue(value = "postponedContents", required = false) String postponedContents,
                                     Model model) {
-        if (postponedContents == null || postponedContents.equals("")) {
+        if (postponedContents == null || postponedContents.isEmpty()) {
             model.addAttribute(IS_POSTPONED_EMPTY, true);
         } else {
             model.addAttribute(IS_POSTPONED_EMPTY, false);
@@ -49,7 +50,7 @@ public class PostponedController extends BaseController{
     public String handleRemoveBookFromCartRequest(@PathVariable("slug") String slug, @CookieValue(name =
             "postponedContents", required = false) String postponedContents, HttpServletResponse response, Model model) {
 
-        if (postponedContents != null && !postponedContents.equals("")) {
+        if (postponedContents != null && !postponedContents.isEmpty()) {
             Cookie cookie = CookieHandleUtil.removeElementFromCookieValue(slug, postponedContents, POSTPONED_BOOKS_COOKIE_NAME);
             cookie.setPath(COOKIE_PATH);
             response.addCookie(cookie);

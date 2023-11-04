@@ -2,6 +2,7 @@ package com.example.bookshopapp.controllers;
 
 import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.service.BookService;
+import com.example.bookshopapp.service.UserService;
 import com.example.bookshopapp.util.CookieHandleUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,8 +21,8 @@ public class CartController extends BaseController {
     public static final String CART_BOOKS_COOKIE_NAME = "cartContents";
     public static final String COOKIE_PATH = "/";
 
-    protected CartController(BookService bookService) {
-        super(bookService);
+    protected CartController(BookService bookService, UserService userService) {
+        super(bookService, userService);
     }
 
     @ModelAttribute(name = "bookCart")
@@ -32,7 +33,7 @@ public class CartController extends BaseController {
     @GetMapping("/cart")
     public String handleCartRequest(@CookieValue(value = "cartContents", required = false) String cartContents,
                                     Model model) {
-        if (cartContents == null || cartContents.equals("")) {
+        if (cartContents == null || cartContents.isEmpty()) {
             model.addAttribute(IS_CART_EMPTY, true);
         } else {
             model.addAttribute(IS_CART_EMPTY, false);
@@ -49,7 +50,7 @@ public class CartController extends BaseController {
     public String handleRemoveBookFromCartRequest(@PathVariable("slug") String bookSlug, @CookieValue(name =
             CART_BOOKS_COOKIE_NAME, required = false) String cartContents, HttpServletResponse response, Model model) {
 
-        if (cartContents != null && !cartContents.equals("")) {
+        if (cartContents != null && !cartContents.isEmpty()) {
             Cookie cookie = CookieHandleUtil.removeElementFromCookieValue(bookSlug, cartContents, CART_BOOKS_COOKIE_NAME);
             cookie.setPath(COOKIE_PATH);
             response.addCookie(cookie);

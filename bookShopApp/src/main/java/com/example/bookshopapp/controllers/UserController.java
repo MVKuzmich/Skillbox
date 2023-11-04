@@ -19,14 +19,11 @@ import javax.servlet.http.HttpServletResponse;
 @Controller
 @Slf4j
 public class UserController extends BaseController {
-
-    private final UserService userService;
     private final SmsService smsService;
     private final EmailSenderService emailSenderService;
 
     protected UserController(BookService bookService, UserService userService, SmsService smsService, EmailSenderService emailSenderService) {
-        super(bookService);
-        this.userService = userService;
+        super(bookService, userService);
         this.smsService = smsService;
         this.emailSenderService = emailSenderService;
     }

@@ -3,6 +3,7 @@ package com.example.bookshopapp.controllers;
 import com.example.bookshopapp.dto.BooksPageDto;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.TagService;
+import com.example.bookshopapp.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,8 +16,8 @@ public class TagController extends BaseController {
 
     private final TagService tagService;
 
-    protected TagController(BookService bookService, TagService tagService) {
-        super(bookService);
+    protected TagController(BookService bookService, UserService userService, TagService tagService) {
+        super(bookService, userService);
         this.tagService = tagService;
     }
 

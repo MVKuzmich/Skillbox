@@ -20,12 +20,10 @@ import java.time.LocalDate;
 public class MainPageController extends BaseController {
 
     private final TagService tagService;
-    private final UserService userService;
 
     protected MainPageController(BookService bookService, TagService tagService, UserService userService) {
-        super(bookService);
+        super(bookService, userService);
         this.tagService = tagService;
-        this.userService = userService;
     }
 
     @GetMapping("/")

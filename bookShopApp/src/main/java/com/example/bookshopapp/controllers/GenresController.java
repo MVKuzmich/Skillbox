@@ -3,6 +3,7 @@ package com.example.bookshopapp.controllers;
 import com.example.bookshopapp.dto.BooksPageDto;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.GenreService;
+import com.example.bookshopapp.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +13,8 @@ public class GenresController extends BaseController {
 
     private final GenreService genreService;
 
-    public GenresController(BookService bookService, GenreService genreService) {
-        super(bookService);
+    public GenresController(BookService bookService, UserService userService, GenreService genreService) {
+        super(bookService, userService);
         this.genreService = genreService;
     }
 

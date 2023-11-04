@@ -33,8 +33,6 @@ public class BookController extends BaseController {
     private final ResourceStorage storage;
     private final RatingService ratingService;
     private final BookReviewService bookReviewService;
-
-    private final UserService userService;
     private final BookReviewLikeService bookReviewLikeService;
 
     @Value("${book.review.min-length}")
@@ -43,7 +41,7 @@ public class BookController extends BaseController {
     public BookController(BookService bookService, ResourceStorage storage,
                           RatingService ratingService, BookReviewService bookReviewService,
                           UserService userService, BookReviewLikeService bookReviewLikeService) {
-        super(bookService);
+        super(bookService, userService);
         this.storage = storage;
         this.ratingService = ratingService;
         this.bookReviewService = bookReviewService;

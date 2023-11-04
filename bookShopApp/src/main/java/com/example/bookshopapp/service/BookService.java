@@ -202,4 +202,7 @@ public class BookService {
     }
 
 
+    public Integer getCountOfBoughtBooks(UserEntity user) {
+        return bookRepository.findCountOfBoughtBooks(user);
+    }
 }
