@@ -3,12 +3,10 @@ package com.example.bookshopapp.controllers;
 import com.example.bookshopapp.data.ResourceStorage;
 import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.data.book.review.BookReviewEntity;
-import com.example.bookshopapp.data.book.review.BookReviewLikeEntity;
 import com.example.bookshopapp.data.user.UserEntity;
 import com.example.bookshopapp.dto.*;
 import com.example.bookshopapp.errors.BookReviewMinLengthException;
 import com.example.bookshopapp.service.*;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -30,10 +28,8 @@ import java.util.List;
 @Controller
 @RequestMapping("/books")
 @Slf4j
-@RequiredArgsConstructor
 public class BookController extends BaseController {
 
-    private final BookService bookService;
     private final ResourceStorage storage;
     private final RatingService ratingService;
     private final BookReviewService bookReviewService;
@@ -43,6 +39,17 @@ public class BookController extends BaseController {
 
     @Value("${book.review.min-length}")
     private Integer bookReviewMinLength;
+
+    public BookController(BookService bookService, ResourceStorage storage,
+                          RatingService ratingService, BookReviewService bookReviewService,
+                          UserService userService, BookReviewLikeService bookReviewLikeService) {
+        super(bookService);
+        this.storage = storage;
+        this.ratingService = ratingService;
+        this.bookReviewService = bookReviewService;
+        this.userService = userService;
+        this.bookReviewLikeService = bookReviewLikeService;
+    }
 
 
     @GetMapping("/{slug}")

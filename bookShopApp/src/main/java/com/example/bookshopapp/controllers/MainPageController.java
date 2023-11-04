@@ -5,7 +5,6 @@ import com.example.bookshopapp.dto.BooksPageDto;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.TagService;
 import com.example.bookshopapp.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,13 +17,16 @@ import java.security.Principal;
 import java.time.LocalDate;
 
 @Controller
-@RequiredArgsConstructor
 public class MainPageController extends BaseController {
 
-    private final BookService bookService;
     private final TagService tagService;
     private final UserService userService;
 
+    protected MainPageController(BookService bookService, TagService tagService, UserService userService) {
+        super(bookService);
+        this.tagService = tagService;
+        this.userService = userService;
+    }
 
     @GetMapping("/")
     public String mainPage(Model model,

@@ -2,10 +2,9 @@ package com.example.bookshopapp.controllers;
 
 
 import com.example.bookshopapp.dto.AuthorPageBooksDto;
-import com.example.bookshopapp.dto.BooksPageDto;
 import com.example.bookshopapp.service.AuthorService;
 
-import lombok.RequiredArgsConstructor;
+import com.example.bookshopapp.service.BookService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,12 +12,14 @@ import org.springframework.web.bind.annotation.*;
 
 
 @Controller
-@RequiredArgsConstructor
 public class AuthorsController extends BaseController {
 
     private final AuthorService authorService;
 
-
+    public AuthorsController(BookService bookService, AuthorService authorService) {
+        super(bookService);
+        this.authorService = authorService;
+    }
 
     @GetMapping("/authors")
     public String authorsPage(Model model) {

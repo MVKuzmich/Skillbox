@@ -3,18 +3,22 @@ package com.example.bookshopapp.controllers;
 import com.example.bookshopapp.dto.BooksPageDto;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.TagService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequiredArgsConstructor
 public class TagController extends BaseController {
 
     private final TagService tagService;
-    private final BookService bookService;
 
+    protected TagController(BookService bookService, TagService tagService) {
+        super(bookService);
+        this.tagService = tagService;
+    }
 
 
     @GetMapping("/tags/{tagId}")

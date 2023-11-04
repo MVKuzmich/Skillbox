@@ -4,35 +4,32 @@ import com.example.bookshopapp.dto.UserContactConfirmationPayload;
 import com.example.bookshopapp.dto.UserContactConfirmationResponse;
 import com.example.bookshopapp.dto.UserRegistrationForm;
 import com.example.bookshopapp.emailsender.EmailSenderService;
+import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.UserService;
 import com.example.bookshopapp.sms2FA.SmsCode;
 import com.example.bookshopapp.sms2FA.SmsService;
-import com.example.bookshopapp.sms2FA.Sms_byResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.security.Principal;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
 
 @Controller
-@RequiredArgsConstructor
 @Slf4j
 public class UserController extends BaseController {
 
     private final UserService userService;
     private final SmsService smsService;
     private final EmailSenderService emailSenderService;
+
+    protected UserController(BookService bookService, UserService userService, SmsService smsService, EmailSenderService emailSenderService) {
+        super(bookService);
+        this.userService = userService;
+        this.smsService = smsService;
+        this.emailSenderService = emailSenderService;
+    }
 
     @GetMapping("/signin")
     public String handleSignInPage() {

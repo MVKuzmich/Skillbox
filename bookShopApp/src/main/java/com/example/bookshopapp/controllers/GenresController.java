@@ -1,28 +1,21 @@
 package com.example.bookshopapp.controllers;
 
-import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.dto.BooksPageDto;
-import com.example.bookshopapp.dto.GenreDto;
-import com.example.bookshopapp.dto.SearchWordDto;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.GenreService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 @Controller
-@RequiredArgsConstructor
 public class GenresController extends BaseController {
 
     private final GenreService genreService;
-    private final BookService bookService;
 
-
+    public GenresController(BookService bookService, GenreService genreService) {
+        super(bookService);
+        this.genreService = genreService;
+    }
 
     @GetMapping("/genres")
     public String genresPage(Model model) {

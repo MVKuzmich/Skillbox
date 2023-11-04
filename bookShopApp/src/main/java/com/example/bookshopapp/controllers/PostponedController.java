@@ -3,7 +3,6 @@ package com.example.bookshopapp.controllers;
 import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.util.CookieHandleUtil;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +14,15 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/books")
-@RequiredArgsConstructor
 public class PostponedController extends BaseController{
 
     public static final String COOKIE_PATH = "/";
     public static final String POSTPONED_BOOKS_COOKIE_NAME = "postponedContents";
     public static final String IS_POSTPONED_EMPTY = "isPostponedEmpty";
-    private final BookService bookService;
+
+    protected PostponedController(BookService bookService) {
+        super(bookService);
+    }
 
     @ModelAttribute(name = "postponedBooks")
     public List<Book> bookCart() {
