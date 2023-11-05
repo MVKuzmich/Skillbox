@@ -24,9 +24,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -200,7 +202,6 @@ public class BookService {
     public List<Book> getBooksWithMaxPrice() {
         return bookRepository.getBooksWithMaxDiscount();
     }
-
 
     public Integer getCountOfBoughtBooks(UserEntity user) {
         return bookRepository.findCountOfBoughtBooks(user);

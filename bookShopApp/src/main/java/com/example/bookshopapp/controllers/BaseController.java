@@ -34,9 +34,8 @@ public abstract class BaseController {
     }
 
     @ModelAttribute("myBooksCount")
-    @PreAuthorize("hasRole('USER')")
-    public Integer getBoughtBooksCount() {
-        return bookService.getCountOfBoughtBooks(userService.getCurrentUser());
+    public Integer getBoughtBooksCount(Principal principal) {
+        return principal == null ? 0 : bookService.getCountOfBoughtBooks(userService.getCurrentUser());
     }
 
     @ModelAttribute("postponedBooksCount")
