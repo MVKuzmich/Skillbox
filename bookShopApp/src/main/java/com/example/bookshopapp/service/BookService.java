@@ -208,12 +208,21 @@ public class BookService {
     }
 
     public Integer getCountOfPostponedBooks(String postponedContents, UserEntity currentUser) {
-        if(currentUser != null) {
+        if (currentUser != null) {
             return bookRepository.findCountOfPostponedBooks(currentUser);
         } else if (postponedContents != null && !postponedContents.isEmpty()) {
             return CookieHandleUtil.getBookSlugFromCookieValue(postponedContents).size();
-        } else {
-            return 0;
         }
+        return 0;
+    }
+
+    public Integer getCountOfCartBooks(String cartContents, UserEntity currentUser) {
+        if (currentUser != null) {
+            return bookRepository.findCountOfCartBooks(currentUser);
+        } else if (cartContents != null && !cartContents.isEmpty()) {
+            return CookieHandleUtil.getBookSlugFromCookieValue(cartContents).size();
+        }
+        return 0;
     }
 }
+

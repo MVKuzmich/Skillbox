@@ -47,4 +47,14 @@ public abstract class BaseController {
         }
         return bookService.getCountOfPostponedBooks(postponedContents, currentUser);
     }
+
+    @ModelAttribute("cartBooksCount")
+    public Integer getCartBooksCount(Principal principal, @CookieValue(name =
+            "cartContents", required = false) String cartContents)  {
+        UserEntity currentUser = null;
+        if(principal != null) {
+            currentUser = userService.getCurrentUser();
+        }
+        return bookService.getCountOfCartBooks(cartContents, currentUser);
+    }
 }
