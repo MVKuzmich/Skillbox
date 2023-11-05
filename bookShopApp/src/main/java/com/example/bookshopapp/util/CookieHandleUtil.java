@@ -27,7 +27,7 @@ public class CookieHandleUtil {
 
     public static Cookie addElementToCookieValue(String bookSlug, String cookieValue, String cookieName) {
         Cookie cookie = null;
-        if (cookieValue == null || cookieValue.equals("")) {
+        if (cookieValue == null || cookieValue.isEmpty()) {
             cookie = new Cookie(cookieName, bookSlug);
         } else if (!cookieValue.contains(bookSlug)) {
             cookieValue = cookieValue.concat("/").concat(bookSlug);
@@ -35,7 +35,7 @@ public class CookieHandleUtil {
         }
         return cookie;
     }
-    private static List<String> getBookSlugFromCookieValue(String bookContentsCookieValue) {
+    public static List<String> getBookSlugFromCookieValue(String bookContentsCookieValue) {
         return Arrays.stream(CookieHandleUtil.checkIfFirstOrEndSlashExist(bookContentsCookieValue).split("/")).collect(Collectors.toList());
     }
 
@@ -49,4 +49,5 @@ public class CookieHandleUtil {
         }
         return bookSlugs;
     }
+
 }

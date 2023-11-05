@@ -5,8 +5,10 @@ import com.example.bookshopapp.data.user.UserEntity;
 import com.example.bookshopapp.dto.SearchWordDto;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.UserService;
+import com.example.bookshopapp.util.CookieHandleUtil;
 import org.apache.catalina.User;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import java.security.Principal;
@@ -35,5 +37,15 @@ public abstract class BaseController {
     @PreAuthorize("hasRole('USER')")
     public Integer getBoughtBooksCount() {
         return bookService.getCountOfBoughtBooks(userService.getCurrentUser());
+    }
+
+    @ModelAttribute("postponedBooksCount")
+    public Integer getPostponedBooksCount(Principal principal, @CookieValue(name =
+            "postponedContents", required = false) String postponedContents)  {
+        UserEntity currentUser = null;
+        if(principal != null) {
+            currentUser = userService.getCurrentUser();
+        }
+        return bookService.getCountOfPostponedBooks(postponedContents, currentUser);
     }
 }

@@ -161,6 +161,13 @@ public interface BookRepository extends
             "join b2u.type t " +
             "where t.code = 'PAID' and u = :user")
     Integer findCountOfBoughtBooks(UserEntity user);
+
+    @Query("select count(b) from Book b " +
+            "join b.book2UserEntitySet b2u " +
+            "join b2u.user u " +
+            "join b2u.type t " +
+            "where t.code = 'KEPT' and u = :user")
+    Integer findCountOfPostponedBooks(UserEntity user);
 }
 
 
