@@ -22,7 +22,7 @@ public interface BookRepository extends
         BookFilterRepository,
         QuerydslPredicateExecutor<Book> {
 
-    Page<Book> findBookByTitleContaining(String bookTitle, Pageable nextPage);
+    Page<Book> findBooksByTitleContaining(String bookTitle, Pageable nextPage);
 
     @Query("select b from Book b where b.slug = :slug")
     Book findBySlug(String slug);

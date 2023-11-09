@@ -2075,6 +2075,10 @@
     width: 100%
 }
 
+.Error-message {
+    color: red;
+}
+
 @media screen and (max-width: 990px) {
     .Header-search {
         display: none
