@@ -4647,16 +4647,17 @@ img {
 
 .Tags {
     font-size: 16px;
-    margin-top: 20px
+    margin-top: 20px;
+    display: inline-block;
 }
 
-.Tags .Tags {
+.Tags .Tag {
     padding-left: 30px;
     margin-top: 0;
     margin-bottom: 20px
 }
 
-.Tags .Tags:last-child {
+.Tags .Tag:last-child {
     margin-bottom: 0
 }
 
@@ -4692,7 +4693,8 @@ img {
 
 .Tags .Tag {
     margin-right: 20px;
-    margin-bottom: 10px
+    margin-bottom: 5px;
+    display: inline-block;
 }
 
 .Tag a {
@@ -4729,7 +4731,8 @@ img {
 }
 
 .Tag_xs {
-    font-size: .7em
+    font-size: .7em;
+    margin: 0;
 }
 
 .Topup {

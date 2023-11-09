@@ -16,7 +16,7 @@ public interface TagRepository extends JpaRepository<TagEntity, Integer> {
 
     @Query(value = "select result.id, result.description, " +
             "concat(" +
-            "cast(10 + (round(cast(result.portion as numeric) * 10/result.total) * 5) as varchar), 'px') as size " +
+            "cast(15 + (round(cast(result.portion as numeric) * 10/result.total) * 5) as varchar), 'px') as size " +
             "from " +
             "(select t.id, t.description, count(t.id) as portion, sum(t.id) as total " +
             "from tags t " +
