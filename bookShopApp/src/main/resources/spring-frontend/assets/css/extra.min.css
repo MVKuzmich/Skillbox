@@ -4660,6 +4660,13 @@ img {
 .Tags .Tag:last-child {
     margin-bottom: 0
 }
+.Tags_genres {
+    display: block;
+}
+.Tags_genres .Tags_embed {
+    display: block;
+    padding-left: 15px;
+}
 
 .Tags_genres .Tag {
     font-size: 1em
