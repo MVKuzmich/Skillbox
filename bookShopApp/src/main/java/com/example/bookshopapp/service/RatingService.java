@@ -58,4 +58,8 @@ public class RatingService {
         rateRangeList.sort(Comparator.comparing(RateRangeDto::getRateValue).reversed());
         return rateRangeList;
     }
+
+    public Integer getBookRating(String slug) {
+         return ratingRepository.findBookRatingBySlug(slug);
+    }
 }

@@ -72,7 +72,7 @@ public class Book {
     private List<BookFile> bookFileList = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "book")
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     private Set<Book2UserEntity> book2UserEntitySet = new HashSet<>();
 
     @JsonIgnore

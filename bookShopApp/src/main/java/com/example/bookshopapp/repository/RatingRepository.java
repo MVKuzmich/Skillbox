@@ -22,6 +22,12 @@ public interface RatingRepository extends JpaRepository<BookRateEntity, Integer>
             "group by br.value")
     List<RateRangeDto> findRateRangeForBook(String bookSlug);
 
+    @Query("select avg(br.value) " +
+            "from BookRateEntity br " +
+            "join br.book b " +
+            "where b.slug = :bookSlug")
+    Integer findBookRatingBySlug(String bookSlug);
+
 
     @Query("select bre from BookRateEntity bre where bre.book = :book and bre.user = :user")
     Optional<BookRateEntity> findBookRateByUser(Book book, UserEntity user);

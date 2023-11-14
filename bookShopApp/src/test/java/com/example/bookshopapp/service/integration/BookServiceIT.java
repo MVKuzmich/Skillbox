@@ -2,6 +2,7 @@ package com.example.bookshopapp.service.integration;
 
 import com.example.bookshopapp.IntegrationTestBase;
 import com.example.bookshopapp.data.book.Book;
+import com.example.bookshopapp.dto.BookDto;
 import com.example.bookshopapp.dto.BookUnitDto;
 import com.example.bookshopapp.service.BookService;
 import lombok.RequiredArgsConstructor;
@@ -47,11 +48,11 @@ class BookServiceIT extends IntegrationTestBase {
     @Test
     void checkGetBooksBySlugIn() {
         String[] slugs = {"book-452-npg", "book-978-den"};
-        List<Book> books = bookService.getBooksBySlugIn(slugs);
+        List<BookDto> books = bookService.getBooksBySlugIn(slugs);
         assertThat(books).isNotNull();
         assertThat(books).isNotEmpty();
         books.stream()
-                .map(Book::getSlug)
+                .map(BookDto::getSlug)
                 .forEach(slug -> assertTrue(Arrays.asList(slugs).contains(slug)));
     }
 

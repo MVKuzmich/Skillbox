@@ -15,6 +15,7 @@ public class BookDto {
     String title;
     Integer discount;
     Boolean isBestseller;
+    Integer rating;
     String status;
     Integer price;
     Integer discountPrice;

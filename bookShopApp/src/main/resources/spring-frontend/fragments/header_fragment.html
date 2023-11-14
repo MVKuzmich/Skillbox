@@ -97,7 +97,7 @@
                         </a>
 <!--                        -->
 <!--                        logout-->
-                        <a class="CartBlock-block" href="/signin.html" th:href="@{/logout}">
+                        <a sec:authorize="isAuthenticated()" class="CartBlock-block" href="/signout.html" th:href="@{/logout}">
                             <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" width="22" height="23">
                                 <defs>
                                     <style>.cls-1{fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px;}</style>

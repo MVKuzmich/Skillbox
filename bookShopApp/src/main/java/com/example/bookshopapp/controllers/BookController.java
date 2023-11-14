@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -51,7 +52,12 @@ public class BookController extends BaseController {
 
 
     @GetMapping("/{slug}")
-    public String chosenBookPage(@PathVariable("slug") String slug, Model model) {
+    public String chosenBookPage(Principal principal,
+                                 @CookieValue(value = "postponedContents", required = false) String postponedContents,
+                                 @CookieValue(value = "cartContents", required = false) String cartContents,
+                                 @PathVariable("slug") String slug,
+                                 Model model) {
+
         List<RateRangeDto> bookRateRangeList = ratingService.getBookRateRangeList(slug);
         model.addAttribute("bookRateCreateDto", new BookRateCreateDto());
         model.addAttribute("book", bookService.getBookUnitDtoByBookSlug(slug));

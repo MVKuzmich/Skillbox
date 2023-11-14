@@ -14,16 +14,14 @@ import com.example.bookshopapp.errors.BookstoreApiWrongParameterException;
 import com.example.bookshopapp.mapper.BookMapper;
 import com.example.bookshopapp.querydsl.QuerydslPredicateBuilder;
 import com.example.bookshopapp.querydsl.RecommendBooksFilter;
-import com.example.bookshopapp.repository.BookFileRepository;
-import com.example.bookshopapp.repository.BookRepository;
-import com.example.bookshopapp.repository.BookReviewRepository;
-import com.example.bookshopapp.repository.TagRepository;
+import com.example.bookshopapp.repository.*;
 import com.example.bookshopapp.util.CookieHandleUtil;
 import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +42,8 @@ public class BookService {
     private final BookFileRepository bookFileRepository;
     private final BookMapper bookMapper;
     private final QuerydslPredicateBuilder predicateBuilder;
+    private final Book2UserRepository book2UserRepository;
+    private final Book2UserTypeRepository book2UserTypeRepository;
 
 
     public Page<Book> getPageOfSearchResultsBooks(String searchWord, Integer offset, Integer limit) {
@@ -64,8 +64,10 @@ public class BookService {
         return bookRepository.getBestsellers();
     }
 
-    public List<Book> getBooksBySlugIn(String[] cookieSlugs) {
-        return bookRepository.findBooksBySlugIn(cookieSlugs);
+    public List<BookDto> getBooksBySlugIn(String[] cookieSlugs) {
+        return bookRepository.findBooksBySlugIn(cookieSlugs).stream()
+                .map(book -> bookMapper.toBookDto(book, getAuthors(book.getId())))
+                .collect(Collectors.toList());
     }
 
 
@@ -224,5 +226,19 @@ public class BookService {
         }
         return 0;
     }
+
+    public List<BookDto> getBooksInCartByUser(UserEntity currentUser) {
+        return bookRepository.findBooksInCart(currentUser).stream()
+                .map(book -> bookMapper.toBookDto(book, getAuthors(book.getId())))
+                .collect(Collectors.toList());
+    }
+
+    public List<BookDto> getPostponedBooksByUser(UserEntity currentUser) {
+        return bookRepository.findBooksPostponed(currentUser).stream()
+                .map(book -> bookMapper.toBookDto(book, getAuthors(book.getId())))
+                .collect(Collectors.toList());
+    }
+
+
 }
 

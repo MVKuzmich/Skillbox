@@ -5,11 +5,13 @@ import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.data.tag.TagEntity;
 import com.example.bookshopapp.data.user.UserEntity;
 import com.example.bookshopapp.dto.AuthorDto;
+import com.example.bookshopapp.dto.BookDto;
 import com.example.bookshopapp.dto.BookModelDto;
 import com.example.bookshopapp.dto.BookUnitModelDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
@@ -117,11 +119,13 @@ public interface BookRepository extends
             "b.price * 100 as discount, " +
             "b.isBestseller as bestseller, " +
             "avg(br.value) as rating, " +
-            "b.description as description, b.priceOld as price, b.priceOld * (1 - b.price) as discountPrice " +
-            "from Book b " +
-            "left join b.bookRateList br " +
+            "b.description as description, " +
+            "b.priceOld as price, " +
+                    "b.priceOld * (1 - b.price) as discountPrice " +
+                    "from Book b " +
+                    "left join b.bookRateList br " +
             "where b.slug = :bookSlug " +
-            "group by b.id, b.slug, b.image, b.title")
+                    "group by b.id, b.slug, b.image, b.title")
     Optional<BookUnitModelDto> findBookUnitBySlug(String bookSlug);
 
 
@@ -144,7 +148,7 @@ public interface BookRepository extends
             "join b2u.user u " +
             "join b2u.type t " +
             "where t.code in ('KEPT', 'CART', 'PAID') and u = :user")
-    List<Book>findBooksByUserChoice(UserEntity user);
+    List<Book> findBooksByUserChoice(UserEntity user);
 
     @Query("select b from Book b " +
             "left join b.bookRateList br " +
@@ -175,6 +179,22 @@ public interface BookRepository extends
             "join b2u.type t " +
             "where t.code = 'CART' and u = :user")
     Integer findCountOfCartBooks(UserEntity user);
+
+    @Query("select b from Book b " +
+            "join b.book2UserEntitySet b2u " +
+            "join b2u.user u " +
+            "join b2u.type t " +
+            "where t.code = 'CART' and u = :user")
+    List<Book> findBooksInCart(UserEntity user);
+
+    @Query("select b from Book b " +
+            "join b.book2UserEntitySet b2u " +
+            "join b2u.user u " +
+            "join b2u.type t " +
+            "where t.code = 'KEPT' and u = :user")
+    List<Book> findBooksPostponed(UserEntity user);
+
+
 }
 
 

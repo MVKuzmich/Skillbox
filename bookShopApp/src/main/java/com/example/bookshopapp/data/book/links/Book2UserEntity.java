@@ -2,6 +2,7 @@ package com.example.bookshopapp.data.book.links;
 
 import com.example.bookshopapp.data.book.Book;
 import com.example.bookshopapp.data.user.UserEntity;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,4 +35,10 @@ public class Book2UserEntity {
     private UserEntity user;
 
 
+    public Book2UserEntity(LocalDateTime time, Book2UserTypeEntity type, Book book, UserEntity user) {
+        this.time = time;
+        this.type = type;
+        this.book = book;
+        this.user = user;
+    }
 }

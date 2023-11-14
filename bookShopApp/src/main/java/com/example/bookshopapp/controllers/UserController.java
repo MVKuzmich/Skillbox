@@ -4,6 +4,7 @@ import com.example.bookshopapp.dto.UserContactConfirmationPayload;
 import com.example.bookshopapp.dto.UserContactConfirmationResponse;
 import com.example.bookshopapp.dto.UserRegistrationForm;
 import com.example.bookshopapp.emailsender.EmailSenderService;
+import com.example.bookshopapp.service.Book2UserService;
 import com.example.bookshopapp.service.BookService;
 import com.example.bookshopapp.service.UserService;
 import com.example.bookshopapp.sms2FA.SmsCode;
@@ -21,11 +22,17 @@ import javax.servlet.http.HttpServletResponse;
 public class UserController extends BaseController {
     private final SmsService smsService;
     private final EmailSenderService emailSenderService;
+    private final Book2UserService book2UserService;
 
-    protected UserController(BookService bookService, UserService userService, SmsService smsService, EmailSenderService emailSenderService) {
+    protected UserController(BookService bookService,
+                             UserService userService,
+                             SmsService smsService,
+                             EmailSenderService emailSenderService,
+                             Book2UserService book2UserService) {
         super(bookService, userService);
         this.smsService = smsService;
         this.emailSenderService = emailSenderService;
+        this.book2UserService = book2UserService;
     }
 
     @GetMapping("/signin")
@@ -106,10 +113,18 @@ public class UserController extends BaseController {
 
     //
     @PostMapping("/register")
-    public String handleUserRegistration(UserRegistrationForm userRegistrationForm, Model model) {
+    public String handleUserRegistration(UserRegistrationForm userRegistrationForm,
+                                         Model model) {
         userService.registerNewUser(userRegistrationForm);
         model.addAttribute("registrationOk", true);
+
         return "signin";
+    }
+
+    private void deleteCookie(HttpServletResponse response, String cookieName) {
+        Cookie cookie = new Cookie(cookieName, null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 
 
@@ -117,10 +132,23 @@ public class UserController extends BaseController {
     @PostMapping("/login")
     @ResponseBody
     public UserContactConfirmationResponse handleLogin(@RequestBody UserContactConfirmationPayload payload,
-                                                       HttpServletResponse httpServletResponse) {
+                                                       @CookieValue(value = "postponedContents", required = false) String postponedContents,
+                                                       @CookieValue(value = "cartContents", required = false) String cartContents,
+                                                       HttpServletResponse response) {
         UserContactConfirmationResponse loginResponse = userService.jwtLogin(payload);
+
+        if (postponedContents != null) {
+            book2UserService.saveOrUpdateBooksChosenViaCookie(postponedContents, userService.getCurrentUser(), "KEPT");
+        }
+
+        if (cartContents != null) {
+            book2UserService.saveOrUpdateBooksChosenViaCookie(cartContents, userService.getCurrentUser(), "CART");
+        }
+
         Cookie cookie = new Cookie("token", loginResponse.getResult());
-        httpServletResponse.addCookie(cookie);
+        response.addCookie(cookie);
+        deleteCookie(response, "postponedContents");
+        deleteCookie(response, "cartContents");
         return loginResponse;
     }
 

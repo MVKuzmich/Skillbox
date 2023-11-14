@@ -40,7 +40,7 @@ public class UserEntity {
     @Column(columnDefinition = "VARCHAR(255) NOT NULL")
     private String name;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Book2UserEntity> book2UserEntitySet = new HashSet<>();
 
     @OneToMany(mappedBy = "user")

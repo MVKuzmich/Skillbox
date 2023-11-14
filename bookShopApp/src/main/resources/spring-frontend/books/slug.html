@@ -150,14 +150,14 @@ p.error-browser
                         <div class="ProductCard-cart">
                             <!--+div.-cartElement.-cartElement_amount-->
                             <!--    +Amount._product-->
-                            <div class="ProductCard-cartElement">
+                            <div th:unless="${#strings.equals(book.status, 'KEPT')}" class="ProductCard-cartElement">
                                 <button class="btn btn_primary btn_outline" data-sendstatus="KEPT" data-bookid="[1111]" th:attr="data-bookid=${'postponed/' + book.slug}" data-btntype="check" data-btnradio="buyblock" data-check="false" data-alttext="Отложена">
                                     <span class="btn-icon"><img src="/assets/img/icons/heart.svg" alt="heart.svg"/>
                                     </span>
                                     <span class="btn-content">Отложить</span>
                                 </button>
                             </div>
-                            <div class="ProductCard-cartElement">
+                            <div th:unless="${#strings.equals(book.status, 'CART')}" class="ProductCard-cartElement">
                                 <button class="btn btn_primary btn_outline" data-sendstatus="CART" data-bookid="[1111]" th:attr="data-bookid=${book.slug}" data-btntype="check" data-btnradio="buyblock" data-check="false" data-alttext="В корзине">
                                     <span class="btn-icon">
                                         <img src="/assets/img/icons/shopping-basket.svg" alt="shopping-basket.svg"/>
