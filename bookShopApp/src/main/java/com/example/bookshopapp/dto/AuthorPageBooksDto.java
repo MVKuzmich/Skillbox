@@ -9,9 +9,9 @@ import java.util.List;
 public class AuthorPageBooksDto {
 
     private Integer count;
-    private List<BookModelDto> books;
+    private List<BookDto> books;
 
-    public AuthorPageBooksDto(List<BookModelDto> books) {
+    public AuthorPageBooksDto(List<BookDto> books) {
         this.books = books;
         this.count = books.size();
 

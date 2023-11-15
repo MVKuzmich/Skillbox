@@ -3,6 +3,7 @@ package com.example.bookshopapp.mapper;
 import com.example.bookshopapp.data.author.Author;
 import com.example.bookshopapp.dto.AuthorUnitDto;
 import com.example.bookshopapp.dto.AuthorUnitModelDto;
+import com.example.bookshopapp.dto.BookDto;
 import com.example.bookshopapp.dto.BookModelDto;
 import com.example.bookshopapp.repository.AuthorRepository;
 import com.example.bookshopapp.service.AuthorService;
@@ -20,7 +21,7 @@ import java.util.stream.IntStream;
 public interface AuthorMapper {
 
     @Mapping(target = "description", source = "author", qualifiedByName = "descriptionToArray")
-    AuthorUnitDto toAuthorUnitDto(AuthorUnitModelDto author, List<BookModelDto> books);
+    AuthorUnitDto toAuthorUnitDto(AuthorUnitModelDto author, List<BookDto> books);
 
     @Named("descriptionToArray")
     default String[] descriptionToArray(AuthorUnitModelDto author) {

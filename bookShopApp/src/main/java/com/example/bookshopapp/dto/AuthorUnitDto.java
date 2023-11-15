@@ -17,6 +17,6 @@ public class AuthorUnitDto {
     String slug;
     String name;
     String[] description;
-    List<BookModelDto> books;
+    List<BookDto> books;
     Long countBooksByAuthor;
 }

@@ -88,13 +88,15 @@
                   <div class="Slider-content" >
                     <div class="Card">
                       <div class="Card-picture"><a href="#"><img th:src="${book.image}" src="/assets/img/content/main/card.jpg" alt="card.jpg"/></a>
-                        <div class="Card-sale">30% скидка
-                        </div><a class="Card-status" title="Отложена"><img src="/assets/img/icons/heart.svg" alt="heart.svg"/></a>
+                        <div class="Card-sale" th:text="${book.discount}">30% скидка</div>
+                        <a th:if="${#strings.equals(book.status, 'KEPT')}" class="Card-status" title="Отложена">
+                          <img src="/assets/img/icons/heart.svg" alt="heart.svg"/>
+                        </a>
                       </div>
                       <div class="Card-content">
                         <strong class="Card-title"><a href="#" th:href="'/books/' + ${book.slug}" th:text="${book.title}">Техника</a>
                         </strong>
-                        <div class="Card-description" th:text="${book.description}">Кондратенко Александр Петрович
+                        <div class="Card-description" th:text="${book.authors}">Кондратенко Александр Петрович
                         </div>
                         <div class="Card-cost">
                           <span class="Card-priceOld" th:text="${book.price}">₽500.00</span>

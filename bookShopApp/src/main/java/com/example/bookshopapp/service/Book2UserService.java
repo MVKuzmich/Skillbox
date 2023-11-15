@@ -28,6 +28,7 @@ public class Book2UserService {
         return book2UserTypeRepository.findBookStatusByBookSlug(slug).orElse("UNLINK");
     }
 
+    @Transactional
     public void saveOrUpdateBooksChosenViaCookie(String cookieValue, UserEntity user, String statusCode) {
         List<String> bookSlugs = CookieHandleUtil.getBookSlugFromCookieValue(cookieValue);
         bookSlugs.forEach(slug -> saveOrUpdateBook2User(user, statusCode, slug));

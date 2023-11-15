@@ -42,8 +42,6 @@ public class BookService {
     private final BookFileRepository bookFileRepository;
     private final BookMapper bookMapper;
     private final QuerydslPredicateBuilder predicateBuilder;
-    private final Book2UserRepository book2UserRepository;
-    private final Book2UserTypeRepository book2UserTypeRepository;
 
 
     public Page<Book> getPageOfSearchResultsBooks(String searchWord, Integer offset, Integer limit) {

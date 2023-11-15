@@ -42,12 +42,12 @@ public class AuthorsController extends BaseController {
         return "books/author";
     }
 
-    @GetMapping(value = "books/author/{slug}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/books/author/{slug}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public AuthorPageBooksDto getAllBooksByAuthor(@PathVariable("slug") String slug,
                                                   @RequestParam("offset") Integer offset,
                                                   @RequestParam("limit") Integer limit) {
-        return new AuthorPageBooksDto(authorService.getBooksByAuthorSlug(slug, offset, limit));
+        return new AuthorPageBooksDto(authorService.getBooksByAuthorSlug(slug, offset, limit).getContent());
     }
 
 }
